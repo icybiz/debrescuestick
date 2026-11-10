@@ -12,20 +12,25 @@ class PowerShellTests(unittest.TestCase):
                 'nativeWindowsTested': False, 'explorerUiTested': False,
                 'source_sha256': hashlib.sha256(b'source').hexdigest(),
                 'tests_sha256': hashlib.sha256(b'tests').hexdigest(),
+                'receiver_sha256': hashlib.sha256(b'receiver').hexdigest(),
+                'receiver_tests_sha256': hashlib.sha256(b'receiver-tests').hexdigest(),
                 'cases': ['hashes-and-lengths', 'real-lock-and-unchanged-metadata', 'asynchronous-forward-progress',
                           'timeouts-and-false-green-refusal', 'zip-layout-validation',
-                          'nonrecursive-owned-cleanup', 'non-windows-refusal']}
+                          'nonrecursive-owned-cleanup', 'non-windows-refusal',
+                          'fresh-bound-handoff', 'bounded-download-and-reference-sha',
+                          'bound-checker-report', 'receive-owned-cleanup']}
 
     def test_portable_proof_requires_exact_sources_and_cannot_claim_native_pass(self):
         proof = self.proof()
-        pscheck.validate(proof, 'source', 'tests')
+        pscheck.validate(proof, 'source', 'tests', 'receiver', 'receiver-tests')
         for name, value in (('success', False), ('scope', 'windows-shell-zip'),
                             ('nativeWindowsTested', True), ('explorerUiTested', True),
-                            ('source_sha256', '0' * 64), ('tests_sha256', '0' * 64), ('cases', [])):
+                            ('source_sha256', '0' * 64), ('tests_sha256', '0' * 64),
+                            ('receiver_sha256', '0' * 64), ('receiver_tests_sha256', '0' * 64), ('cases', [])):
             bad = copy.deepcopy(proof)
             bad[name] = value
             with self.assertRaises(ValueError):
-                pscheck.validate(bad, 'source', 'tests')
+                pscheck.validate(bad, 'source', 'tests', 'receiver', 'receiver-tests')
 
     def test_runtime_root_and_recursive_cleanup_reject_bad_segments_before_deletion(self):
         self.assertEqual(pscheck.runtime('a' * 10), Path('/tmp/debrescuestick-pscheck') / ('a' * 10))

@@ -138,7 +138,7 @@ function Remove-OwnRun([string]$RunRoot, [string]$RunId) {
 
 function Invoke-ExplorerCheck {
     param([string]$ZipPath, [string]$ZipSha256, [string]$ImageSha256,
-          [string]$WorkRoot = '', [int]$TimeoutSeconds = 900)
+          [string]$WorkRoot = '', [int]$TimeoutSeconds = 900, [switch]$AsObject)
     if ([Environment]::OSVersion.Platform -ne [PlatformID]::Win32NT) { throw 'Native Windows is required.' }
     if (-not [Environment]::UserInteractive -or
         [Threading.Thread]::CurrentThread.ApartmentState -ne [Threading.ApartmentState]::STA) {
@@ -229,6 +229,7 @@ function Invoke-ExplorerCheck {
             $resultFile.Write($encoded, 0, $encoded.Length)
         } finally { $resultFile.Dispose() }
     }
+    if ($AsObject) { return [pscustomobject]$report }
     [Console]::WriteLine($json)
     if (-not $report.success) { return 1 }
     return 0

@@ -110,8 +110,9 @@ def start():
         'operator_sha256':hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
     write(folder/'run.json',record)
     status=request('/api/status')
-    if not status.get('available') or TEMPLATE not in status.get('sources_url',''):
+    if status.get('available') is not True or status.get('sources_url')!='/debrescuestick/sources/'+TEMPLATE+'/':
         raise RuntimeError('Exact qualified live template required')
+    record.update(reference_schema='drs-extraction-reference-v1',template_sha256=TEMPLATE)
     job=request('/api/jobs',{'public_key':public})
     if job['fingerprint']!=fingerprint:raise RuntimeError('Requested public key identity differs')
     record['job']=job;write(folder/'run.json',record)

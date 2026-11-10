@@ -191,6 +191,50 @@ Project scripts run from memory; the temporary runtime and fixtures are removed.
 `ps.lock.json` pins the official runtime. No real image or Windows VM is needed
 for those portable guards, and none is created on the development host.
 
+## Automatic handoff to a Windows test guest
+
+`handoff.py new` reuses the existing independent reference-extraction operator
+on `browser.local`, waits for it to finish, returns its temporary resources,
+and prepares a small guest payload. The operator first reserves that host using
+its existing resource-management procedure. No VM is created by this command.
+Alternatively, use a fresh completed reference with:
+
+```sh
+python3 handoff.py prepare --reference artifacts/extract-KEY/run.json
+```
+
+Preparation requires the exact pinned base, a successful stopped reference unit,
+returned resources, the verified archive log and matching full-length libarchive
+and 7-Zip IMG hashes. Live request metadata must still match. References from an
+older schema, another request, an expired request or an unfinished test are refused.
+The image and archive hashes are carried automatically; no manual hash entry is
+needed in the guest.
+
+The generated private folder contains `manifest.json`, both checker scripts and
+`start.cmd`, plus a small `payload.zip` containing only those files. It contains a
+short-lived download capability and must not be published. The launcher binds the
+manifest hash; the manifest binds the script bytes, exact request URL, expiry,
+archive length/hash and personalized IMG length/hash. **The large image ZIP never
+passes through the development workstation.**
+
+An existing VM controller places these small files on its normal test medium and
+runs `start.cmd` in an interactive Windows session. `receive.ps1` downloads that
+same ZIP directly in the guest, refuses redirects, validates length/hash and calls
+the Shell checker with the bound references. It checks the resulting data and
+script identities before accepting the report. `DRS_REPORT_PATH` may select an
+existing parent directory's new report file; the default report goes to AppData
+and stdout. Unknown or still-active artifacts are preserved on failure. No global
+Explorer process is killed. The guest volume must fit two ZIP copies, the IMG
+and a 1 GiB reserve; large files require a suitable local filesystem.
+
+This follows the existing staged-test-medium and separate-report model rather
+than introducing another Windows VM provisioner. The VM controller remains
+responsible for a real Windows OS/image identity, its outer deadline, screenshot,
+clean shutdown and resource return. Portable PowerShell fixtures cover the
+receiver and its streaming download/abort logic. **A native guest handoff and the
+complete Explorer UI workflow are still pending**, and portable results never
+claim those tests have passed. Product images and production services are unchanged.
+
 ## License and sources
 
 Original DebRescueStick software is copyright Richard Andresik and licensed under

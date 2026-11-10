@@ -98,27 +98,36 @@ def bootstrap_source(token):
              'XDG_CACHE_HOME':str(run/'cache'),'XDG_CONFIG_HOME':str(run/'config')}
         source=base64.b64encode(payload['source'].encode()).decode()
         tests=base64.b64encode(payload['tests'].encode()).decode()
+        receiver=base64.b64encode(payload['receiver'].encode()).decode()
+        receiver_tests=base64.b64encode(payload['receiver_tests'].encode()).decode()
         command="$ErrorActionPreference='Stop';$s=[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('"+source+"'));"
         command+="$t=$null;$e=$null;$null=[Management.Automation.Language.Parser]::ParseInput($s,[ref]$t,[ref]$e);if($e.Count){throw ($e|Out-String)};. ([scriptblock]::Create($s));"
         command+="$tests=[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('"+tests+"'));& ([scriptblock]::Create($tests)) -FixtureRoot '"+str(run/'fixtures')+"'"
+        command+=";$r=[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('"+receiver+"'));$t=$null;$e=$null;$null=[Management.Automation.Language.Parser]::ParseInput($r,[ref]$t,[ref]$e);if($e.Count){throw ($e|Out-String)};. ([scriptblock]::Create($r));"
+        command+="$tests=[Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('"+receiver_tests+"'));& ([scriptblock]::Create($tests)) -FixtureRoot '"+str(run/'receiver-fixtures')+"'"
         result=subprocess.run([str(tool/'pwsh'),'-NoLogo','-NoProfile','-NonInteractive','-Command',command],env=env,capture_output=True,text=True)
         if result.returncode:raise RuntimeError(result.stdout+'\\n'+result.stderr)
-        proof=json.loads(result.stdout.strip())
-        proof.update(source_sha256=hashlib.sha256(payload['source'].encode()).hexdigest(),tests_sha256=hashlib.sha256(payload['tests'].encode()).hexdigest())
+        rows=[json.loads(line) for line in result.stdout.splitlines() if line.strip()]
+        assert len(rows)==2
+        for row in rows:assert row['success'] is True and row['scope']=='portable-powershell-fixtures' and row['nativeWindowsTested'] is False and row['explorerUiTested'] is False
+        proof=rows[0];proof['cases']+=rows[1]['cases']
+        proof.update(source_sha256=hashlib.sha256(payload['source'].encode()).hexdigest(),tests_sha256=hashlib.sha256(payload['tests'].encode()).hexdigest(),receiver_sha256=hashlib.sha256(payload['receiver'].encode()).hexdigest(),receiver_tests_sha256=hashlib.sha256(payload['receiver_tests'].encode()).hexdigest())
         print(json.dumps(proof))
     ''')
 
 
-def validate(proof, source, tests):
+def validate(proof, source, tests, receiver, receiver_tests):
     if proof.get('success') is not True or proof.get('scope') != 'portable-powershell-fixtures':
         raise ValueError('Complete portable test proof required')
     if proof.get('nativeWindowsTested') is not False or proof.get('explorerUiTested') is not False:
         raise ValueError('Portable tests must never claim native qualification')
-    for field, value in (('source_sha256', source), ('tests_sha256', tests)):
+    for field, value in (('source_sha256', source), ('tests_sha256', tests),
+                         ('receiver_sha256', receiver), ('receiver_tests_sha256', receiver_tests)):
         if proof.get(field) != hashlib.sha256(value.encode()).hexdigest():
             raise ValueError('Tested source differs')
     expected = {'hashes-and-lengths', 'real-lock-and-unchanged-metadata', 'asynchronous-forward-progress', 'timeouts-and-false-green-refusal',
-                'zip-layout-validation', 'nonrecursive-owned-cleanup', 'non-windows-refusal'}
+                'zip-layout-validation', 'nonrecursive-owned-cleanup', 'non-windows-refusal',
+                'fresh-bound-handoff', 'bounded-download-and-reference-sha', 'bound-checker-report', 'receive-owned-cleanup'}
     if set(proof.get('cases', [])) != expected:
         raise ValueError('Missing mandatory portable guards')
 
@@ -129,6 +138,8 @@ def run():
     folder.mkdir(mode=0o700, parents=True)
     source = (ROOT / 'explorer.ps1').read_text()
     tests = (ROOT / 'tests/explorer.ps1').read_text()
+    receiver = (ROOT / 'receive.ps1').read_text()
+    receiver_tests = (ROOT / 'tests/receive.ps1').read_text()
     pin = json.loads((ROOT / 'ps.lock.json').read_text())
     cleanup = shlex.join(['/usr/bin/python3', '-c', cleanup_source(token)])
     command = ['systemd-run', '--unit=debrescuestick-pscheck-' + token, '--wait', '--pipe',
@@ -140,13 +151,14 @@ def run():
     result = subprocess.run(['ssh', '-oBatchMode=yes', '-oStrictHostKeyChecking=yes',
                              '-oConnectTimeout=10', '-oServerAliveInterval=10', '-oServerAliveCountMax=3',
                              'root@browser.local', shlex.join(command)],
-                            input=json.dumps({'pin': pin, 'source': source, 'tests': tests}),
+                            input=json.dumps({'pin': pin, 'source': source, 'tests': tests,
+                                              'receiver': receiver, 'receiver_tests': receiver_tests}),
                             text=True, capture_output=True)
     (folder / 'run.log').write_text(result.stdout + '\nSTDERR\n' + result.stderr)
     if result.returncode:
         raise RuntimeError('PowerShell guards failed: ' + str(folder / 'run.log'))
     proof = json.loads(result.stdout.strip())
-    validate(proof, source, tests)
+    validate(proof, source, tests, receiver, receiver_tests)
     check = subprocess.run(['ssh', '-oBatchMode=yes', '-oStrictHostKeyChecking=yes', '-oConnectTimeout=10', 'root@browser.local',
                             'test ! -e /tmp/debrescuestick-pscheck/' + key(token)], capture_output=True)
     if check.returncode:

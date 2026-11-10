@@ -15,8 +15,8 @@
       "sha256": "92629eeca67b9d9d8286184206eb0ec22e7c94c58bf6b10ddcf6c50f503ee26d"
     },
     "README.md": {
-      "bytes": 11521,
-      "sha256": "7b0d92ec29c79358aacc48a07c2bb17b8474b0b3aa75a6e58ef234cb90fa4397"
+      "bytes": 14168,
+      "sha256": "3c69ecf1997b6008fc161855a9b592b97e22324f09048f6492429587ff1ea1f7"
     },
     "base.py": {
       "bytes": 9184,
@@ -51,12 +51,12 @@
       "sha256": "90780cbc383e9d6b541c4f45dc8fa4323589d3e522396b6d31f45939136940b8"
     },
     "explorer.ps1": {
-      "bytes": 12398,
-      "sha256": "401b6919fb44eb18fd9a8535e348ea250cc2ea0fae5154d9cdb3015929f4b28e"
+      "bytes": 12471,
+      "sha256": "287538e0024383a3294965c72665b5e3808585cfb93787a6ef7d806277f5b4b6"
     },
     "extract.py": {
-      "bytes": 10474,
-      "sha256": "d91b11a0142829afd86926f091936cf764e7ffd2e10b16262faf144363ccf9b8"
+      "bytes": 10595,
+      "sha256": "c2cbf3ca509e96fb0aa5a8e9887ad29e0c555e513c832064e9d77a688b1b7f52"
     },
     "fast.py": {
       "bytes": 7702,
@@ -73,6 +73,10 @@
     "fastroll.py": {
       "bytes": 11477,
       "sha256": "a715e36bd653bea6962b86b3f1e542912fe396e2b9b231d44dd6cc4e98301765"
+    },
+    "handoff.py": {
+      "bytes": 7789,
+      "sha256": "22340da23c6200d5f286ff74ff3eaa082d03777a6cce3a414ef4a85b623abc0d"
     },
     "host.py": {
       "bytes": 9164,
@@ -147,8 +151,8 @@
       "sha256": "5be3c19a89ed0e4f7b187f798a12b53a6e7a9b6821e1f625bdf6ae1bcf9621ab"
     },
     "pscheck.py": {
-      "bytes": 9444,
-      "sha256": "6a94dabc59d94fd0c2f0fbdd10d3d492109f1f4f6624d4284425ea2eed951bf2"
+      "bytes": 11007,
+      "sha256": "cb32c6aeb118fe9730bfc41e36a7b314e2b45067acfb4f22dc9c8ee3dff788bc"
     },
     "public.py": {
       "bytes": 3473,
@@ -165,6 +169,10 @@
     "qualify.py": {
       "bytes": 18680,
       "sha256": "c7783f57a81085a4ca7ff4ed9c4076ae7aec362c88d0b8737b80431f5f12665b"
+    },
+    "receive.ps1": {
+      "bytes": 12499,
+      "sha256": "a1e8d204656b941b87c0f39729249fdb8b770291c4904fe1bd0e4f371a77572c"
     },
     "retire.py": {
       "bytes": 9084,
@@ -222,6 +230,10 @@
       "bytes": 4347,
       "sha256": "6f64251d1944ccb80ce3038406c16ea2fb459c570a41647dc00ed374337a7ab0"
     },
+    "tests/receive.ps1": {
+      "bytes": 6133,
+      "sha256": "14654cd26dbfe7dea88c65d3e68f2a4da2b71906e97befff6779c50a6b862d1d"
+    },
     "tests/support.py": {
       "bytes": 1230,
       "sha256": "c90c2722242718f36c0785a609b1450906d1fb7848faa4ca75516bca67a58fd6"
@@ -239,8 +251,8 @@
       "sha256": "91aee44b9aa1f6beaa51634f36e69c117211a3912c8d46a496531dccfac48306"
     },
     "tests/test_extract.py": {
-      "bytes": 1422,
-      "sha256": "1381c08648a8e99f59e7e53c8e8f21b1a0130434582ac3460525721ed2a4063c"
+      "bytes": 2954,
+      "sha256": "676ac4b9948234dd2f72414fca2f6ec8f77b8c0ca977dab3ef6158163fdbe7a3"
     },
     "tests/test_fast.py": {
       "bytes": 2381,
@@ -257,6 +269,10 @@
     "tests/test_fastroll.py": {
       "bytes": 2353,
       "sha256": "b42dab7c1475335ceee602375eb99d306b1f9d90d6e1fe207344a078498f8f5b"
+    },
+    "tests/test_handoff.py": {
+      "bytes": 6914,
+      "sha256": "a2dc76c6e73446134fb862f29cc4c23970b23782ea889904f2e8c188c7b35536"
     },
     "tests/test_host.py": {
       "bytes": 3529,
@@ -299,8 +315,8 @@
       "sha256": "fed1a6695feedab3d6a31028708c658df52cb48e6c3fce294f39f6386cc465e5"
     },
     "tests/test_pscheck.py": {
-      "bytes": 2351,
-      "sha256": "6eb644b43400a543e738a0b103e3388ad52a83a8e96ee43a934a3b7796b9c2ec"
+      "bytes": 2833,
+      "sha256": "bfa2d9e471ee28ffe9c89bc8362b44146201364b8618c04ea161ed2e29da9d03"
     },
     "tests/test_public.py": {
       "bytes": 3106,
