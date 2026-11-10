@@ -61,6 +61,8 @@ are bound to their original receipts and are not general installation commands.
 Use Python 3.11 or later, Node.js 22 or later, OpenSSH client tools, Bash and GNU
 coreutils. The standard gate uses only tiny synthetic fixtures:
 
+Run all these lightweight checks with `sh check.sh`, or run them individually:
+
 ```sh
 python3 -m unittest discover -s tests
 node --check static/app.js
@@ -116,6 +118,12 @@ The worker additionally requires a protected root-owned
 helpers create or validate this marker. A first deployment uses `rollout.py`
 with the successful image, QA and source job keys; inspect its command help.
 `deploy/` contains the service and Apache configuration templates.
+
+After a qualification unit has stopped, return its temporary disks and ephemeral
+keys with `python3 qa_clean.py submit --qa QA_JOB_KEY`. This verifies the unit,
+guest exit receipts and exact artifact ownership before removing individual
+temporary files. Factory templates, production files and qualification proofs
+are retained. Inspect the cleanup job's status as well.
 
 The defaults use `/opt/debrescuestick`, `/var/lib/debrescuestick`,
 `/etc/debrescuestick` and `/var/backups/debrescuestick`. Review origins, URL paths,

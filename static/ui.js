@@ -32,7 +32,7 @@ const UI = (() => {
     "prepareYourImage": "Prepare your image",
     "terminalLabel": "SSH connection to the rescue system",
     "yourAccess": "Your SSH access",
-    "terminalAddress": "# After booting: read the IP address on the target computer",
+    "terminalAddress": "# After booting: check the name and addresses on the target computer",
     "terminalKey": "Sign in with your private key.",
     "stepsLabel": "FROM YOUR KEY TO YOUR RESCUE STICK",
     "stepsTitle": "Prepare. Boot. Connect.",
@@ -58,7 +58,7 @@ const UI = (() => {
     "write1": "Download the ZIP file, verify its SHA-256 checksum, and extract <code>DebRescueStick-amd64.img</code>.",
     "write2": "Select the intended USB stick as the whole target device. Writing the image replaces its existing contents.",
     "write3": "Write the image using a disk image writer. On Windows 8 or later, for example, you can use <a href=\"https://rufus.ie/\">Rufus</a> and write the IMG file in DD mode.",
-    "write4": "Boot the target computer from the stick. The local rescue console shows its network addresses and SSH host key fingerprints. Connect with <code>ssh root@IP-ADDRESS</code>; for a private key in a different location, use <code>ssh -i PATH-TO-PRIVATE-KEY root@IP-ADDRESS</code>.",
+    "write4": "Boot the target computer from the stick. The local rescue console shows the network name, IP addresses, SSH status and host key fingerprints. Connect with <code>ssh root@debrstick.local</code>, or use the actual name or IP address shown on the console. For a private key in a different location, use <code>ssh -i PATH-TO-PRIVATE-KEY root@debrstick.local</code>. The .local name requires multicast DNS on your client and network.",
     "expiryTitle": "What happens to my download?",
     "expiryInfo": "The prepared system is reused; only the small key partition is personalized for you. The download link is valid for two hours from the time you submit your request. This is the download window, not the preparation time. The request, submitted public key, and personal download are removed after expiry. Treat the download link as personal and share it only deliberately.",
     "lifetimeTitle": "How long will my rescue stick work?",
@@ -135,7 +135,9 @@ const UI = (() => {
     "macWrite": "Find the USB stick with <code>diskutil list</code>. Replace <code>N</code> in both <code>/dev/diskN</code> and <code>/dev/rdiskN</code> with its disk number. The commands unmount the stick, write the extracted image, finish pending writes and eject it. While dd is running, <code>Control+T</code> can show progress.",
     "unixTitle": "Other Unix systems, including BSD",
     "unixWrite": "Identify the USB device using your system’s disk tools and unmount all its partitions. Replace <code>/dev/USB_DEVICE</code> with the whole USB device. This form uses a numeric block size and omits GNU-specific progress options.",
-    "writeFinish": "All existing data on the selected target is replaced. Run these commands with the extracted IMG, not the ZIP file, and wait for successful completion before removing the stick. Creating a stick on macOS does not change the image’s x86-64 (amd64) boot requirement."
+    "writeFinish": "All existing data on the selected target is replaced. Run these commands with the extracted IMG, not the ZIP file, and wait for successful completion before removing the stick. Creating a stick on macOS does not change the image’s x86-64 (amd64) boot requirement.",
+    "projectSources": "DebRescueStick source code (GPL-3.0-or-later)",
+    "ownLicence": "The complete DebRescueStick software is open source under GPL-3.0-or-later, including the website, backend, image builders and tests. Follow the GitHub link in the footer. Its licence is also in the image at <code>/usr/local/share/debrescuestick/COPYING</code>. Included Debian packages retain their individual licences."
   },
   "de": {
     "home": "DebRescueStick Startseite",
@@ -168,7 +170,7 @@ const UI = (() => {
     "prepareYourImage": "Dein Image vorbereiten",
     "terminalLabel": "SSH-Verbindung zum Rettungssystem",
     "yourAccess": "Dein SSH-Zugang",
-    "terminalAddress": "# Nach dem Start: IP-Adresse am Zielrechner ablesen",
+    "terminalAddress": "# Nach dem Start: Namen und Adressen am Zielrechner ablesen",
     "terminalKey": "Mit deinem privaten Schlüssel anmelden.",
     "stepsLabel": "VON DEINEM SCHLÜSSEL ZUM RETTUNGSSTICK",
     "stepsTitle": "Vorbereiten. Starten. Verbinden.",
@@ -194,7 +196,7 @@ const UI = (() => {
     "write1": "Lade die ZIP-Datei herunter, prüfe ihre SHA-256-Prüfsumme und entpacke <code>DebRescueStick-amd64.img</code>.",
     "write2": "Wähle den gewünschten USB-Stick als vollständiges Zielgerät. Das Schreiben des Images ersetzt seinen bisherigen Inhalt.",
     "write3": "Schreibe das Image mit einem Programm zum Schreiben von Datenträgerabbildern. Unter Windows 8 oder neuer kannst du beispielsweise <a href=\"https://rufus.ie/\">Rufus</a> verwenden und die IMG-Datei im DD-Modus schreiben.",
-    "write4": "Starte den Zielrechner vom Stick. Die lokale Rettungskonsole zeigt Netzwerkadressen und Fingerabdrücke der SSH-Hostschlüssel. Verbinde dich mit <code>ssh root@IP-ADDRESS</code>; liegt dein privater Schlüssel an anderer Stelle, verwende <code>ssh -i PATH-TO-PRIVATE-KEY root@IP-ADDRESS</code>.",
+    "write4": "Starte den Zielrechner vom Stick. Die lokale Rettungskonsole zeigt Netzwerknamen, IP-Adressen, SSH-Status und Hostschlüssel-Fingerabdrücke. Verbinde dich mit <code>ssh root@debrstick.local</code> oder verwende den tatsächlich angezeigten Namen bzw. die IP-Adresse. Liegt dein privater Schlüssel an anderer Stelle, verwende <code>ssh -i PATH-TO-PRIVATE-KEY root@debrstick.local</code>. Der .local-Name benötigt Multicast-DNS auf deinem Rechner und im Netzwerk.",
     "expiryTitle": "Was passiert mit meinem Download?",
     "expiryInfo": "Das vorbereitete System wird wiederverwendet; nur die kleine Schlüsselpartition wird für dich personalisiert. Der Downloadlink ist ab deiner Anfrage zwei Stunden gültig. Das ist die Downloadfrist, nicht die Vorbereitungszeit. Nach Ablauf werden Auftrag, übermittelter öffentlicher Schlüssel und persönlicher Download gelöscht. Behandle den Downloadlink als persönlich und gib ihn nur bewusst weiter.",
     "lifetimeTitle": "Wie lange funktioniert mein Rettungsstick?",
@@ -271,7 +273,9 @@ const UI = (() => {
     "macWrite": "Ermittle den USB-Stick mit <code>diskutil list</code>. Ersetze <code>N</code> in <code>/dev/diskN</code> und <code>/dev/rdiskN</code> durch seine Datenträgernummer. Die Befehle hängen den Stick aus, schreiben das entpackte Image, schließen ausstehende Schreibzugriffe ab und werfen den Stick aus. Während dd läuft, kann <code>Control+T</code> den Fortschritt anzeigen.",
     "unixTitle": "Weitere Unix-Systeme, einschließlich BSD",
     "unixWrite": "Ermittle das USB-Gerät mit den Datenträgerwerkzeugen deines Systems und hänge alle seine Partitionen aus. Ersetze <code>/dev/USB_DEVICE</code> durch das gesamte USB-Gerät. Diese Variante verwendet eine numerische Blockgröße und verzichtet auf GNU-spezifische Fortschrittsoptionen.",
-    "writeFinish": "Alle vorhandenen Daten auf dem ausgewählten Ziel werden ersetzt. Verwende die entpackte IMG-Datei, nicht die ZIP-Datei, und warte vor dem Abziehen auf den erfolgreichen Abschluss. Auch wenn du den Stick unter macOS erstellst, benötigt das Image zum Booten weiterhin x86-64 (amd64)."
+    "writeFinish": "Alle vorhandenen Daten auf dem ausgewählten Ziel werden ersetzt. Verwende die entpackte IMG-Datei, nicht die ZIP-Datei, und warte vor dem Abziehen auf den erfolgreichen Abschluss. Auch wenn du den Stick unter macOS erstellst, benötigt das Image zum Booten weiterhin x86-64 (amd64).",
+    "projectSources": "DebRescueStick-Quellcode (GPL-3.0-or-later)",
+    "ownLicence": "Die gesamte DebRescueStick-Software ist Open Source unter GPL-3.0-or-later, einschließlich Website, Backend, Imagebau und Tests. Den GitHub-Link findest du im Seitenfuß. Die Lizenz liegt auch im Image unter <code>/usr/local/share/debrescuestick/COPYING</code>. Enthaltene Debian-Pakete behalten ihre jeweiligen Lizenzen."
   },
   "fr": {
     "home": "Accueil DebRescueStick",
@@ -304,7 +308,7 @@ const UI = (() => {
     "prepareYourImage": "Préparer votre image",
     "terminalLabel": "Connexion SSH au système de secours",
     "yourAccess": "Votre accès SSH",
-    "terminalAddress": "# Après le démarrage : relevez l’adresse IP de l’ordinateur cible",
+    "terminalAddress": "# Après le démarrage : relevez le nom et les adresses de l’ordinateur cible",
     "terminalKey": "Connectez-vous avec votre clé privée.",
     "stepsLabel": "DE VOTRE CLÉ SSH À VOTRE CLÉ USB DE SECOURS",
     "stepsTitle": "Préparer. Démarrer. Se connecter.",
@@ -330,7 +334,7 @@ const UI = (() => {
     "write1": "Téléchargez le fichier ZIP, vérifiez sa somme de contrôle SHA-256 et décompressez <code>DebRescueStick-amd64.img</code>.",
     "write2": "Sélectionnez la clé USB souhaitée comme périphérique cible entier. L’écriture de l’image remplace son contenu existant.",
     "write3": "Écrivez l’image à l’aide d’un logiciel d’écriture d’images disque. Sous Windows 8 ou une version ultérieure, vous pouvez par exemple utiliser <a href=\"https://rufus.ie/\">Rufus</a> et écrire le fichier IMG en mode DD.",
-    "write4": "Démarrez l’ordinateur cible sur la clé USB. La console de secours locale affiche les adresses réseau et les empreintes des clés d’hôte SSH. Connectez-vous avec <code>ssh root@IP-ADDRESS</code> ; si votre clé privée se trouve ailleurs, utilisez <code>ssh -i PATH-TO-PRIVATE-KEY root@IP-ADDRESS</code>.",
+    "write4": "Démarrez l’ordinateur cible sur la clé USB. La console de secours locale affiche le nom réseau, les adresses IP, l’état SSH et les empreintes des clés d’hôte. Connectez-vous avec <code>ssh root@debrstick.local</code>, ou utilisez le nom ou l’adresse IP affichés sur la console. Si votre clé privée se trouve ailleurs, utilisez <code>ssh -i PATH-TO-PRIVATE-KEY root@debrstick.local</code>. Le nom .local nécessite le DNS multicast sur votre client et votre réseau.",
     "expiryTitle": "Que devient mon téléchargement ?",
     "expiryInfo": "Le système préparé est réutilisé ; seule la petite partition contenant la clé est personnalisée. Le lien de téléchargement est valable deux heures à compter de votre demande. Il s’agit du délai de téléchargement, pas du temps de préparation. Après expiration, la demande, la clé publique fournie et le téléchargement personnel sont supprimés. Considérez ce lien comme personnel et ne le partagez que volontairement.",
     "lifetimeTitle": "Combien de temps ma clé de secours fonctionnera-t-elle ?",
@@ -407,7 +411,9 @@ const UI = (() => {
     "macWrite": "Identifiez la clé USB avec <code>diskutil list</code>. Remplacez <code>N</code> dans <code>/dev/diskN</code> et <code>/dev/rdiskN</code> par son numéro de disque. Les commandes démontent la clé, écrivent l’image décompressée, terminent les écritures en attente et l’éjectent. Pendant l’exécution de dd, <code>Control+T</code> peut afficher la progression.",
     "unixTitle": "Autres systèmes Unix, dont BSD",
     "unixWrite": "Identifiez le périphérique USB avec les outils de gestion des disques de votre système et démontez toutes ses partitions. Remplacez <code>/dev/USB_DEVICE</code> par le périphérique USB entier. Cette variante utilise une taille de bloc numérique et omet les options de progression propres à GNU.",
-    "writeFinish": "Toutes les données existantes sur la cible sélectionnée sont remplacées. Utilisez le fichier IMG décompressé, pas le ZIP, et attendez la fin de l’opération sans erreur avant de retirer la clé. Créer la clé sous macOS ne change pas l’exigence de démarrage x86-64 (amd64) de l’image."
+    "writeFinish": "Toutes les données existantes sur la cible sélectionnée sont remplacées. Utilisez le fichier IMG décompressé, pas le ZIP, et attendez la fin de l’opération sans erreur avant de retirer la clé. Créer la clé sous macOS ne change pas l’exigence de démarrage x86-64 (amd64) de l’image.",
+    "projectSources": "Code source de DebRescueStick (GPL-3.0-or-later)",
+    "ownLicence": "Tous les logiciels de DebRescueStick sont libres sous GPL-3.0-or-later, y compris le site, le serveur, les outils de construction d’images et les tests. Le lien GitHub figure en bas de page. La licence est également présente dans l’image sous <code>/usr/local/share/debrescuestick/COPYING</code>. Les paquets Debian inclus conservent leurs licences respectives."
   },
   "es": {
     "home": "Inicio de DebRescueStick",
@@ -440,7 +446,7 @@ const UI = (() => {
     "prepareYourImage": "Preparar tu imagen",
     "terminalLabel": "Conexión SSH al sistema de rescate",
     "yourAccess": "Tu acceso SSH",
-    "terminalAddress": "# Tras el arranque: consulta la dirección IP del ordenador de destino",
+    "terminalAddress": "# Tras el arranque: consulta el nombre y las direcciones del ordenador de destino",
     "terminalKey": "Inicia sesión con tu clave privada.",
     "stepsLabel": "DE TU CLAVE SSH A TU MEMORIA USB DE RESCATE",
     "stepsTitle": "Preparar. Arrancar. Conectar.",
@@ -466,7 +472,7 @@ const UI = (() => {
     "write1": "Descarga el archivo ZIP, verifica su suma de comprobación SHA-256 y descomprime <code>DebRescueStick-amd64.img</code>.",
     "write2": "Selecciona la memoria USB deseada como dispositivo de destino completo. La escritura de la imagen sustituye su contenido existente.",
     "write3": "Escribe la imagen con una herramienta de escritura de imágenes de disco. En Windows 8 o posterior, por ejemplo, puedes usar <a href=\"https://rufus.ie/\">Rufus</a> y escribir el archivo IMG en modo DD.",
-    "write4": "Arranca el ordenador de destino desde la memoria USB. La consola de rescate local muestra las direcciones de red y las huellas de las claves de host SSH. Conéctate con <code>ssh root@IP-ADDRESS</code>; si tu clave privada está en otra ubicación, usa <code>ssh -i PATH-TO-PRIVATE-KEY root@IP-ADDRESS</code>.",
+    "write4": "Arranca el ordenador de destino desde la memoria USB. La consola de rescate local muestra el nombre de red, las direcciones IP, el estado de SSH y las huellas de las claves de host. Conéctate con <code>ssh root@debrstick.local</code> o usa el nombre o la dirección IP que aparece en la consola. Si tu clave privada está en otra ubicación, usa <code>ssh -i PATH-TO-PRIVATE-KEY root@debrstick.local</code>. El nombre .local requiere DNS multicast en tu equipo y en la red.",
     "expiryTitle": "¿Qué ocurre con mi descarga?",
     "expiryInfo": "El sistema preparado se reutiliza; solo se personaliza para ti la pequeña partición de la clave. El enlace de descarga es válido durante dos horas desde que envías la solicitud. Ese es el plazo de descarga, no el tiempo de preparación. Al caducar, se eliminan la solicitud, la clave pública proporcionada y la descarga personal. Trata el enlace como personal y compártelo solo de forma consciente.",
     "lifetimeTitle": "¿Durante cuánto tiempo funcionará mi memoria de rescate?",
@@ -543,7 +549,9 @@ const UI = (() => {
     "macWrite": "Identifica la memoria USB con <code>diskutil list</code>. Sustituye <code>N</code> en <code>/dev/diskN</code> y <code>/dev/rdiskN</code> por su número de disco. Los comandos desmontan la memoria, escriben la imagen descomprimida, completan las escrituras pendientes y la expulsan. Mientras se ejecuta dd, <code>Control+T</code> puede mostrar el progreso.",
     "unixTitle": "Otros sistemas Unix, incluido BSD",
     "unixWrite": "Identifica el dispositivo USB con las herramientas de discos de tu sistema y desmonta todas sus particiones. Sustituye <code>/dev/USB_DEVICE</code> por el dispositivo USB completo. Esta variante utiliza un tamaño de bloque numérico y omite las opciones de progreso específicas de GNU.",
-    "writeFinish": "Se sustituyen todos los datos existentes del destino seleccionado. Usa el archivo IMG descomprimido, no el ZIP, y espera a que la operación termine sin errores antes de retirar la memoria. Crear la memoria en macOS no cambia el requisito de arranque x86-64 (amd64) de la imagen."
+    "writeFinish": "Se sustituyen todos los datos existentes del destino seleccionado. Usa el archivo IMG descomprimido, no el ZIP, y espera a que la operación termine sin errores antes de retirar la memoria. Crear la memoria en macOS no cambia el requisito de arranque x86-64 (amd64) de la imagen.",
+    "projectSources": "Código fuente de DebRescueStick (GPL-3.0-or-later)",
+    "ownLicence": "Todo el software de DebRescueStick es de código abierto bajo GPL-3.0-or-later, incluidos el sitio web, el servidor, los generadores de imágenes y las pruebas. El enlace de GitHub está al pie de la página. La licencia también se incluye en la imagen en <code>/usr/local/share/debrescuestick/COPYING</code>. Los paquetes Debian incluidos conservan sus respectivas licencias."
   }
 };
   const defaults = Object.freeze({language:'en',appearance:'system',width:'normal',size:'normal',smooth:true});

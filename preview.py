@@ -47,7 +47,7 @@ def run(live=False,job=None,request=False):
     os.nice(10)
     if request and (not live or job):raise ValueError('Request a new ordinary image only for live acceptance')
     if job and (len(job)!=48 or any(c not in '0123456789abcdef' for c in job)):raise ValueError('Exact own canary token required')
-    profile=ROOT/'artifacts'/('preview-'+secrets.token_hex(5));profile.mkdir(mode=0o700)
+    profile=ROOT/'artifacts'/('preview-'+secrets.token_hex(5));profile.mkdir(mode=0o700,parents=True)
     if request:
         identity=profile/'ephemeral-key'
         subprocess.run(['ssh-keygen','-q','-t','ed25519','-N','','-C','English-page-acceptance','-f',str(identity)],check=True)
@@ -101,7 +101,11 @@ def run(live=False,job=None,request=False):
     except Exception as error:record['error']=type(error).__name__+': '+str(error)
     finally:
         server.shutdown();server.server_close();thread.join(5)
-        try:stop_tunnel(child,expected)
+        try:
+            record['tunnel_expected']=expected.decode(errors='replace') if expected else None
+            diagnostic=Path('/proc')/str(child.pid)/'cmdline' if child else None
+            record['tunnel_observed']=diagnostic.read_bytes().decode(errors='replace') if diagnostic and diagnostic.exists() else None
+            stop_tunnel(child,expected)
         except Exception as error:
             record.update(success=False,cleanup_error=type(error).__name__+': '+str(error))
             raise

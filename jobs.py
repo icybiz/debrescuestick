@@ -12,7 +12,7 @@ REMOTE=Path('/var/lib/debrescuestick/fast')
 
 def submit(tool,files,arguments,key=None):
     token=base.key(key or secrets.token_hex(5))
-    if tool not in ('fastbuild.py','fastprobe.py','fastroll.py','english.py','update.py'):raise ValueError('Known operator tool required')
+    if tool not in ('fastbuild.py','fastprobe.py','fastroll.py','english.py','update.py','qa_clean.py'):raise ValueError('Known operator tool required')
     payload={name:(ROOT/name).read_bytes() for name in files}
     manifest={name:hashlib.sha256(raw).hexdigest() for name,raw in payload.items()}
     sha=hashlib.sha256(json.dumps(manifest,sort_keys=True).encode()).hexdigest()

@@ -109,7 +109,7 @@ def script(record):
 
 
 def start():
-    token=secrets.token_hex(5);folder=ROOT/'artifacts'/('secure-'+token);folder.mkdir(mode=0o700)
+    token=secrets.token_hex(5);folder=ROOT/'artifacts'/('secure-'+token);folder.mkdir(mode=0o700,parents=True)
     private=ROOT/'.private'/('secure-'+token);private.mkdir(mode=0o700,parents=True)
     identity=private/'owner'
     subprocess.run(['ssh-keygen','-q','-t','ed25519','-N','','-C','Secure-Boot-acceptance','-f',str(identity)],check=True)

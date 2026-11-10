@@ -19,7 +19,7 @@ from keys import public_key
 ROOT=Path(__file__).resolve().parent
 ORIGIN='https://eorls.com/debrescuestick'
 RAW_SIZE=8598323200
-TEMPLATE='13927b4b24a6142a5130936af912e61d5d63d8d7e61524a325e209a0aea2c5da'
+TEMPLATE='fd4ff0918e30b11ffe4b992929c9c62f520b1b6919d9b79891f88c4ccd045a9a'
 SEVEN_URL='https://github.com/ip7z/7zip/releases/download/26.06/7z2606-linux-x64.tar.xz'
 SEVEN_SHA='2b539cf067b2ad48e1baa5093dbaa8818b73542d1222a0ffde9dc5f2922ea62e'
 BSD_URL='https://deb.debian.org/debian/pool/main/liba/libarchive/libarchive-tools_3.7.4-4%2Bdeb13u1_amd64.deb'
@@ -96,7 +96,7 @@ def script(record):
 
 
 def start():
-    token=secrets.token_hex(5);folder=ROOT/'artifacts'/('extract-'+token);folder.mkdir(mode=0o700)
+    token=secrets.token_hex(5);folder=ROOT/'artifacts'/('extract-'+token);folder.mkdir(mode=0o700,parents=True)
     private=ROOT/'.private';private.mkdir(mode=0o700,exist_ok=True)
     keyfile=private/('extract-key-'+token)
     subprocess.run(['ssh-keygen','-q','-t','ed25519','-N','','-C','DebRescueStick-extraction','-f',str(keyfile)],check=True)

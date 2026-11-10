@@ -11,7 +11,7 @@ class ExportTests(unittest.TestCase):
     def fixture(self, root):
         for name in ('.gitignore', 'COPYING', 'NOTICE', 'debian.lock.json', 'operator.env.example', 'README.md'):
             (root / name).write_text('synthetic source\n')
-        for name in ('server.py', 'worker.py', 'image.py', 'public.py'):
+        for name in ('server.py', 'worker.py', 'image.py', 'public.py', 'preview.mjs'):
             (root / name).write_text('# synthetic project software\n')
         for name in ('deploy/web.service', 'image/setup.sh', 'static/app.js', 'tests/test_example.py'):
             path = root / name
@@ -26,6 +26,9 @@ class ExportTests(unittest.TestCase):
         with workspace() as root:
             self.fixture(root)
             selected = public.files(root)
+            self.assertTrue({'server.py', 'worker.py', 'image.py', 'preview.mjs',
+                             'deploy/web.service', 'image/setup.sh', 'static/app.js',
+                             'tests/test_example.py'} <= set(selected))
             result = public.export(root)
             target = Path(result['directory'])
             manifest = json.loads((target / 'SOURCES.json').read_text())['files']
