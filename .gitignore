@@ -1,0 +1,9 @@
+artifacts/
+.private/
+build/
+state/
+*.img
+*.qcow2
+*.iso
+__pycache__/
+checkpoints/

@@ -1,0 +1,12 @@
+[Unit]
+Description=Load this boot disk's owner key before allowing SSH
+After=local-fs.target systemd-udev-trigger.service
+Before=ssh.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/debrescuestick-keys
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

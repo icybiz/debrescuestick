@@ -1,0 +1,154 @@
+# DebRescueStick
+
+A Debian-based USB rescue environment with SSH access through your own public
+key. The short network name is **debrstick.local**. Website:
+[eorls.com/debrescuestick](https://eorls.com/debrescuestick/).
+
+This repository contains the complete original project software: the website,
+HTTP backend, queue, image builder, boot scripts, deployment and qualification
+tools, and automated tests. Operator credentials, runtime data, image binaries
+and private development notes are excluded.
+
+## Use the rescue stick
+
+1. Submit one **public** OpenSSH key on the website. Keep the private key on your
+   own computer. The website never needs it.
+2. Download and extract the ZIP before the two-hour request expiry.
+3. Write `DebRescueStick-amd64.img` to an entire USB device using an image writer.
+   This replaces its contents. The image is 8 GiB + 8 MiB; use a nominal 16 GB or
+   larger stick. The website includes Linux, macOS and Unix `dd` instructions.
+4. Boot an AMD64 computer from the stick and connect wired Ethernet with DHCP.
+   The local console displays addresses, SSH commands and public host-key
+   fingerprints. Connect using `ssh root@debrstick.local`, or the displayed IP
+   address, with your matching private key.
+
+The `.local` name requires multicast DNS on the client and a network that allows
+multicast. A second stick with the same name may receive an Avahi collision
+suffix; the console displays the actual advertised name. Password SSH login is
+disabled. The local rescue console provides root access to someone physically
+at the machine. New host keys and machine identity are generated during boot.
+
+The image contains Debian rescue tools including GNU ddrescue, TestDisk,
+smartmontools, GParted, cryptsetup and rsync. The website is available in English,
+German, French and Spanish, with local appearance, width and font preferences.
+The image is AMD64; writing it from an ARM Mac does not make it ARM-bootable.
+
+## Architecture
+
+An immutable, keyless Debian 13 base image has a separate 4 MiB FAT16 owner-key
+partition. The boot service reads that partition only from the same disk as the
+root filesystem. Missing or invalid owner keys prevent SSH startup.
+
+The compressed system prefix is shared between requests. Personalization writes
+and reads back the small key partition, compresses it and generates the ZIP64
+ending with the combined CRC32. Clients receive a normal ZIP containing one
+complete IMG, without a special extractor. Each request stores only its small
+individual archive tail. Requests are serialized and bounded; expired individual
+artifacts are removed without deleting the shared system prefix.
+
+`server.py`, `store.py`, `keys.py`, `worker.py` and `fast.py` implement the service.
+`image.py`, `fastbuild.py` and `image/` build the bootable image. `qualify.py` and
+`mdns.py` qualify isolated firmware boots, SSH isolation, multicast discovery and
+the console. `sources.py` preserves exact Debian corresponding sources, including
+Built-Using dependencies. `update.py` promotes a qualified candidate with rollback.
+`rollout.py` deploys frozen application releases. Other root tools include source
+inventory, browser acceptance, archive extraction and historical migration tools.
+The historical one-time migration commands are retained for completeness; they
+are bound to their original receipts and are not general installation commands.
+
+## Small local checks
+
+Use Python 3.11 or later, Node.js 22 or later, OpenSSH client tools, Bash and GNU
+coreutils. The standard gate uses only tiny synthetic fixtures:
+
+```sh
+python3 -m unittest discover -s tests
+node --check static/app.js
+node --check static/ui.js
+node --check preview.mjs
+sh -n image/setup.sh
+sh -n image/keys.sh
+bash -n image/info.sh
+```
+
+Run a local web preview without image generation:
+
+```sh
+python3 server.py --state state --port 8080
+```
+
+Open `http://127.0.0.1:8080/debrescuestick/`. Image requests remain unavailable
+without a qualified template and a live worker. Browser acceptance additionally
+needs an isolated remote Chromium/CDP session and SSH tunnels; see `preview.py`.
+No real media, VM or large image is needed for the local unit tests.
+
+## Build and operate your own service
+
+Use a dedicated Debian GNU/Linux build host with KVM, cgroup v2, systemd, enough
+disk space to retain a 50 GiB reserve, libguestfs, QEMU, OVMF, mtools, dosfstools,
+gdisk and the Apache modules used by `deploy/apache.conf`. These scripts perform
+administrative operations and deliberately refuse arbitrary host or cgroup use.
+Review the commands before running them. They manage only the project's own
+service units and directories.
+
+Copy `operator.env.example` to a private configuration file, set the exact remote
+hostname and SSH destination, then source that file. No builder hostname is
+selected by default. Configure your SSH alias with verified host keys. Frozen
+remote jobs inherit the exact configured hostname through systemd; CPU and memory
+guards remain enforced. Debian input versions and hashes are in `debian.lock.json`.
+
+The image pipeline is:
+
+```sh
+python3 base.py submit
+# Wait for and inspect this input job's successful receipt.
+python3 image.py submit --mode build
+# Wait for the normal image and use its ten-character job key below.
+python3 fastbuild.py submit --template NORMAL_IMAGE_KEY
+python3 qualify.py submit --template FAST_IMAGE_KEY
+python3 sources.py submit --template FAST_IMAGE_KEY
+```
+
+Run these stages serially and inspect each tool's `status` command before
+continuing. Never substitute a successful old job into a failed-build resume.
+The worker additionally requires a protected root-owned
+`/etc/debrescuestick/worker.json` containing the exact `hostname`. Deployment
+helpers create or validate this marker. A first deployment uses `rollout.py`
+with the successful image, QA and source job keys; inspect its command help.
+`deploy/` contains the service and Apache configuration templates.
+
+The defaults use `/opt/debrescuestick`, `/var/lib/debrescuestick`,
+`/etc/debrescuestick` and `/var/backups/debrescuestick`. Review origins, URL paths,
+virtual hosts and service configuration for your installation. Run the public
+HTTP service behind a correctly configured reverse proxy; it must replace the
+client-IP header rather than trusting an incoming user-supplied value. The
+worker is unprivileged and has no network access. Keep source archives available
+for every image distributed, including superseded images.
+
+## Qualification and limits
+
+Firmware qualification uses isolated snapshots and virtual USB storage, owner-key
+success, wrong-key/password rejection, cold host identities and clean shutdown.
+The extended qualification covers BIOS, UEFI and enforced Secure Boot, plus a
+multicast DNS peer in a separate network namespace inside the disposable guest.
+Archive qualification verifies ZIP CRCs and independent extractors. Test tools
+retain receipts; failed or incomplete checks must never be represented as passed.
+
+Physical USB hardware and native Windows Explorer extraction are not yet
+qualified. Individual firmware and network configurations may behave differently.
+The Debian base and each third-party package retain their own support policies.
+
+## License and sources
+
+Original DebRescueStick software is copyright Richard Andresik and licensed under
+**GPL-3.0-or-later**; see [COPYING](COPYING) and [NOTICE](NOTICE). This includes the
+backend, web UI, builders, operator tools and tests. Debian and other third-party
+software retain their individual licenses; their source requirements are not
+replaced by this project's license. The public image source link contains exact
+package sources for that image, rather than just links to a moving mirror.
+
+`public.py export` produces a complete source-only export and a `SOURCES.json`
+manifest with file sizes and SHA256 hashes. It excludes private configuration,
+credentials, downloads, runtime state and private Git history. Historical
+SystemRescueCD converter material remains a separate work under its original
+authors' license and is not required to build this Debian-based project.

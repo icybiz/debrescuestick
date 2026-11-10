@@ -1,0 +1,17 @@
+DebRescueStick
+Copyright (C) 2026 Richard Andresik
+SPDX-License-Identifier: GPL-3.0-or-later
+
+The original software, build tools, tests, documentation and website in this
+project are free software: you may redistribute and modify them under the GNU
+General Public License, version 3 or (at your option) any later version.
+See COPYING for the full licence, including the absence of warranty.
+
+Project source: https://github.com/icybiz/debrescuestick
+Website: https://eorls.com/debrescuestick/
+
+The Debian system and other third-party packages keep their original licences.
+Their notices are provided in /usr/share/doc and /usr/share/common-licenses in
+the image. Exact corresponding Debian sources are offered from the website.
+The historical SystemRescueCd converter is a separate GPL-2.0 work with its
+original authors and licence; this notice does not relicense that work.

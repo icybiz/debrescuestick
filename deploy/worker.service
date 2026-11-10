@@ -1,0 +1,39 @@
+[Unit]
+Description=DebRescueStick isolated personal USB image worker
+After=local-fs.target
+ConditionPathExists=/var/lib/debrescuestick/state/base/qualified.json
+
+[Service]
+Type=simple
+User=debrescuestick
+Group=debrescuestick
+SupplementaryGroups=kvm
+WorkingDirectory=/opt/debrescuestick/current
+Environment=LIBGUESTFS_CACHEDIR=/var/cache/debrescuestick/worker
+ExecStart=/usr/bin/python3 worker.py --state /var/lib/debrescuestick/state
+Restart=on-failure
+RestartSec=10
+UMask=0077
+CPUQuota=100%
+MemoryMax=2G
+MemorySwapMax=0
+TasksMax=128
+Nice=10
+IOWeight=10
+NoNewPrivileges=yes
+CapabilityBoundingSet=
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+PrivateNetwork=yes
+DevicePolicy=closed
+DeviceAllow=/dev/kvm rw
+ReadWritePaths=/var/lib/debrescuestick/state /var/cache/debrescuestick/worker
+ReadOnlyPaths=/var/lib/debrescuestick/state/base
+ReadOnlyPaths=-/var/lib/debrescuestick/state/archives
+InaccessiblePaths=-/var/www -/srv/eorls.com -/etc/letsencrypt -/var/lib/mysql -/var/lib/postgresql
+KillMode=control-group
+TimeoutStopSec=45
+
+[Install]
+WantedBy=multi-user.target
