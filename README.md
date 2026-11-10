@@ -146,6 +146,51 @@ Physical USB hardware and native Windows Explorer extraction are not yet
 qualified. Individual firmware and network configurations may behave differently.
 The Debian base and each third-party package retain their own support policies.
 
+## Prepared Windows Shell ZIP acceptance
+
+`explorer.ps1` is intended for our own disposable interactive Windows test guest
+with Windows PowerShell 5.1 or later, started with `-STA`. It calls
+`Shell.Application.CopyHere` rather than substituting `Expand-Archive` or a
+third-party extractor. Microsoft documents that this call is asynchronous and
+provides no completion notification. The checker waits for the exact IMG length,
+exclusive readability and a full streaming SHA256 match. File existence or an
+unchanged timestamp never counts as completion. See Microsoft's
+[CopyHere documentation](https://learn.microsoft.com/en-us/windows/win32/shell/folder-copyhere).
+
+Supply a completed ZIP, its SHA256 from the request and an independent SHA256
+of the **personalized IMG inside that exact ZIP**, produced with libarchive or
+7-Zip. The cold base template hash and another request's IMG hash are different.
+For the current image the expected uncompressed size is exactly 8,598,323,200 bytes.
+The tool creates its own new work directory, keeps the input ZIP intact, verifies
+available space, and removes its own successful extraction after verification.
+It writes a separate JSON receipt and returns zero only for verified data and
+completed cleanup. Example for the automated guest operator:
+
+```powershell
+powershell.exe -NoLogo -NoProfile -NonInteractive -STA -ExecutionPolicy Bypass -File .\explorer.ps1 -ZipPath C:\Test\image.zip -ZipSha256 $zipSha256 -ImageSha256 $personalImageSha256
+```
+
+The example uses a process-only execution policy for our own trusted checker
+in a disposable test guest; it does not change the registry policy. See the
+[PowerShell command-line reference](https://learn.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_powershell_exe?view=powershell-5.1).
+
+Failure may leave a still-active Shell copy. The receipt marks this explicitly;
+the tool preserves those files and never kills unrelated Explorer processes.
+The outer guest job must impose a deadline and dispose of its own failed guest,
+because a synchronous COM or native I/O call may itself block.
+
+The native Windows/PowerShell 5.1 run is **still pending**. Testing the Shell ZIP
+component also does not prove the entire Explorer ribbon/dialog workflow:
+`explorerUiTested` remains false. Portable PowerShell 7.6.9 fixtures and parser
+checks on Linux cover hashes, real file locking, progress despite identical
+metadata, timeouts, ZIP metadata, refusal boundaries and cleanup. Those fixtures
+explicitly report `nativeWindowsTested: false`. They use tiny synthetic files.
+`python3 pscheck.py run` runs these additional guards on a separately managed
+`browser.local` host, with a pinned vendor runtime, one CPU and 768 MiB limit.
+Project scripts run from memory; the temporary runtime and fixtures are removed.
+`ps.lock.json` pins the official runtime. No real image or Windows VM is needed
+for those portable guards, and none is created on the development host.
+
 ## License and sources
 
 Original DebRescueStick software is copyright Richard Andresik and licensed under

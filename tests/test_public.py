@@ -9,9 +9,9 @@ from support import workspace
 
 class ExportTests(unittest.TestCase):
     def fixture(self, root):
-        for name in ('.gitignore', 'COPYING', 'NOTICE', 'debian.lock.json', 'operator.env.example', 'README.md'):
+        for name in ('.gitignore', 'COPYING', 'NOTICE', 'debian.lock.json', 'ps.lock.json', 'operator.env.example', 'README.md'):
             (root / name).write_text('synthetic source\n')
-        for name in ('server.py', 'worker.py', 'image.py', 'public.py', 'preview.mjs'):
+        for name in ('server.py', 'worker.py', 'image.py', 'public.py', 'preview.mjs', 'explorer.ps1'):
             (root / name).write_text('# synthetic project software\n')
         for name in ('deploy/web.service', 'image/setup.sh', 'static/app.js', 'tests/test_example.py'):
             path = root / name
@@ -26,7 +26,7 @@ class ExportTests(unittest.TestCase):
         with workspace() as root:
             self.fixture(root)
             selected = public.files(root)
-            self.assertTrue({'server.py', 'worker.py', 'image.py', 'preview.mjs',
+            self.assertTrue({'server.py', 'worker.py', 'image.py', 'preview.mjs', 'explorer.ps1', 'ps.lock.json',
                              'deploy/web.service', 'image/setup.sh', 'static/app.js',
                              'tests/test_example.py'} <= set(selected))
             result = public.export(root)

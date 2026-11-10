@@ -9,12 +9,12 @@ import secrets
 ROOT = Path(__file__).resolve().parent
 DIRECTORIES = ('deploy', 'image', 'static', 'tests')
 SUFFIXES = {'.py', '.sh', '.service', '.conf', '.txt', '.js', '.mjs',
-            '.html', '.css', '.svg'}
+            '.html', '.css', '.svg', '.ps1'}
 
 
 def files(root=ROOT):
-    result = {p.name: p for pattern in ('*.py', '*.sh', '*.js', '*.mjs') for p in root.glob(pattern)}
-    for name in ('.gitignore', 'COPYING', 'NOTICE', 'debian.lock.json', 'operator.env.example'):
+    result = {p.name: p for pattern in ('*.py', '*.sh', '*.js', '*.mjs', '*.ps1') for p in root.glob(pattern)}
+    for name in ('.gitignore', 'COPYING', 'NOTICE', 'debian.lock.json', 'ps.lock.json', 'operator.env.example'):
         result[name] = root / name
     result['README.md'] = root / ('PUBLIC.md' if (root / 'PUBLIC.md').is_file() else 'README.md')
     for directory in DIRECTORIES:
