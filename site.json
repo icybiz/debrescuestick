@@ -1,0 +1,347 @@
+{
+  "format": "eorls-site-export",
+  "formatVersion": 4,
+  "site": {
+    "address": "https://eorls.com/debrescuestick",
+    "host": "e",
+    "id": "site-3238a2b9d4070f960d1a76b6",
+    "slug": "debrescuestick",
+    "title": "DebRescueStick",
+    "addressPath": "/debrescuestick"
+  },
+  "source": {
+    "kind": "confirmed-draft",
+    "revisionId": "rev-40-rev-7f7e6e4d7e07a64efae76e031f17ef34",
+    "revisionNumber": 40,
+    "revisionCreatedAt": "2026-11-11T14:02:29.960Z"
+  },
+  "publication": {
+    "state": "not-published"
+  },
+  "document": {
+    "homePageId": "page-c51ff0bd91b3e52db181de72",
+    "languageEditions": [
+      {
+        "locale": "de",
+        "pages": [
+          {
+            "description": "",
+            "id": "page-c51ff0bd91b3e52db181de72",
+            "modules": [
+              {
+                "id": "mod-19c6fb3c01ecadc1894c06a6",
+                "value": "DebRescueStick"
+              },
+              {
+                "id": "mod-6b3af2b6936b0b23839b48b3",
+                "value": "DebRescueStick ist ein unabhängiges USB-Rettungssystem auf Debian-Basis mit SSH-Zugang, der für deinen eigenen öffentlichen Schlüssel vorbereitet wird.\n\nStarte einen Rechner vom Stick, verbinde ihn mit einem kabelgebundenen Netzwerk und melde dich von einem anderen Rechner an. Dein privater SSH-Schlüssel bleibt bei dir. Die Rettungskonsole zeigt den Netzwerknamen, die IP-Adressen und die Fingerabdrücke der Hostschlüssel an.\n\n"
+              }
+            ],
+            "title": "DebRescueStick"
+          },
+          {
+            "description": "",
+            "id": "page-3d9f654e66fad14e8f7a3e79",
+            "modules": [
+              {
+                "id": "mod-335b846fb5d0283c90c39a12",
+                "value": "Tests und Kompatibilität"
+              },
+              {
+                "id": "mod-77fa465f949f4003c72ff18a",
+                "value": "DebRescueStick basiert auf Debian 13 und ist für PCs mit 64-Bit-x86-Prozessor (amd64) vorgesehen. Verwende einen USB-Stick mit mindestens 16 GB Nennkapazität. Das entpackte Image umfasst 8.598.323.200 Byte; der komprimierte Download ist etwa 1,25 GB groß.\n\nDie Prüfungen in virtuellen Maschinen für klassisches BIOS, UEFI und erzwungenes Secure Boot waren erfolgreich. Die SSH-Prüfungen umfassten den vorgesehenen öffentlichen Schlüssel, die Zurückweisung eines anderen Schlüssels und die gesperrte Passwortanmeldung. Auch eine neue Rechneridentität und die Informationen der lokalen Konsole wurden beim Booten geprüft.\n\nDas zusammengesetzte ZIP wurde mit unabhängigen Linux-Werkzeugen entpackt und geprüft. Das Entpacken mit dem nativen Windows Explorer und das Booten auf echter USB-Hardware sind noch ungeprüft: Eine geeignete Windows-Testumgebung und eigene physische Testhardware standen bisher nicht zur Verfügung. Die Ergebnisse der virtuellen Maschinen belegen keine Kompatibilität mit jedem Rechner oder USB-Gerät.\n\nDebRescueStick ist ein unabhängiges Projekt und kein offizielles Debian-Produkt. Debian und die enthaltene Software behalten ihre eigenen Urheberrechte und Lizenzen.\n\n"
+              }
+            ],
+            "title": "Tests und Kompatibilität"
+          },
+          {
+            "description": "",
+            "id": "page-e5bb0698fb84d314dadeb5b4",
+            "modules": [
+              {
+                "id": "mod-8ea000dadb396d53d738b492",
+                "value": "Anleitung und Quellen"
+              },
+              {
+                "id": "mod-9702bc539994bd802de28413",
+                "value": "Schlüssel und USB-Stick vorbereiten\n\nVerwende ausschließlich deinen öffentlichen SSH-Schlüssel (meist eine Datei mit der Endung .pub). Der zugehörige private Schlüssel bleibt auf dem Rechner, von dem du dich verbinden wirst. Entpacke das heruntergeladene ZIP, um die .img-Datei zu erhalten. Das Schreiben des Images löscht den gewählten USB-Stick. Wähle sorgfältig das gesamte USB-Gerät, keine Partition und keine interne Festplatte.\n\nLinux\n\nErmittle das USB-Gerät mit lsblk und hänge seine eingebundenen Partitionen aus. Ersetze /dev/sdX durch dieses gesamte Gerät und verwende den tatsächlichen Namen der entpackten Datei:\n\nsudo dd if=DebRescueStick-amd64.img of=/dev/sdX bs=4M conv=fsync,nocreat status=progress\n\nmacOS\n\nErmittle das USB-Gerät mit diskutil list. Ersetze diskN und rdiskN durch die passenden Gerätenamen und verwende den tatsächlichen Namen der entpackten Datei:\n\ndiskutil unmountDisk /dev/diskN && sudo dd if=DebRescueStick-amd64.img of=/dev/rdiskN bs=4m && sync && diskutil eject /dev/diskN\n\nAndere Unix-Systeme\n\nErmittle das gesamte USB-Gerät und hänge seine Partitionen aus. Verwende das dd des Systems mit bs=1048576 und führe anschließend sync aus, bevor du den Stick entfernst. Gerätenamen und dd-Optionen unterscheiden sich je nach System.\n\nWindows\n\nEntpacke das ZIP und wähle die entpackte .img-Datei sowie den richtigen USB-Stick in einem Image-Schreibprogramm wie Rufus. Falls nach dem Schreibverfahren gefragt wird, wähle den DD-Image-Modus. Warte, bis der Schreibvorgang abgeschlossen ist, bevor du den Stick entfernst.\n\nStarten und verbinden\n\nStarte den Zielrechner vom Stick und verbinde ihn mit einem kabelgebundenen Netzwerk mit DHCP. Der lokale Monitor zeigt den tatsächlichen Netzwerknamen, die IP-Adressen, die SSH-Bereitschaft und die Fingerabdrücke der Hostschlüssel. Wenn Multicast-DNS verfügbar ist, verbinde dich so:\n\nssh root@debrstick.local\n\nFür einen privaten Schlüssel außerhalb der Standardverzeichnisse deines SSH-Clients:\n\nssh -i PATH-TO-PRIVATE-KEY root@debrstick.local\n\nKann der Name nicht aufgelöst werden, verwende eine am Monitor angezeigte IP-Adresse. Bei einem Namenskonflikt kann der Stick einen anderen .local-Namen erhalten. Vergleiche den Fingerabdruck des SSH-Hostschlüssels mit der Anzeige am Monitor des Sticks, bevor du die Verbindung akzeptierst. Die Passwortanmeldung über SSH ist gesperrt.\n\nOpen Source\n\nDie eigene Software des Projekts, seine Build-Werkzeuge und Tests sind unter GPL-3.0-or-later veröffentlicht. Debian und andere enthaltene Komponenten behalten ihre eigenen Lizenzen. Das GitHub-Repository enthält die Projektquellen; die exakten zugehörigen Quellen jedes ausgelieferten Debian-Images werden gesondert mit diesem Image angeboten.\n\n"
+              },
+              {
+                "id": "mod-module-1dd60869013b5b54de5f4f2e5da87392",
+                "value": "Projektquellen auf GitHub"
+              },
+              {
+                "id": "mod-module-bda5c6ab958b4fecbd58cc0d4d67d159",
+                "value": "Quellen des Debian-Images"
+              }
+            ],
+            "title": "Anleitung und Quellen"
+          }
+        ]
+      },
+      {
+        "locale": "fr",
+        "pages": [
+          {
+            "description": "",
+            "id": "page-c51ff0bd91b3e52db181de72",
+            "modules": [
+              {
+                "id": "mod-19c6fb3c01ecadc1894c06a6",
+                "value": "DebRescueStick"
+              },
+              {
+                "id": "mod-6b3af2b6936b0b23839b48b3",
+                "value": "DebRescueStick est un système de secours USB indépendant, basé sur Debian, avec un accès SSH préparé pour votre propre clé publique.\n\nDémarrez un ordinateur depuis la clé USB, connectez-le à un réseau filaire et ouvrez une session depuis un autre ordinateur. Votre clé SSH privée reste chez vous. La console de secours affiche le nom réseau, les adresses IP et les empreintes des clés d’hôte.\n\n"
+              }
+            ],
+            "title": "DebRescueStick"
+          },
+          {
+            "description": "",
+            "id": "page-3d9f654e66fad14e8f7a3e79",
+            "modules": [
+              {
+                "id": "mod-335b846fb5d0283c90c39a12",
+                "value": "Tests et compatibilité"
+              },
+              {
+                "id": "mod-77fa465f949f4003c72ff18a",
+                "value": "DebRescueStick utilise Debian 13 et vise les PC x86 64 bits (amd64). Utilisez une clé USB d’une capacité nominale d’au moins 16 Go. L’image extraite occupe 8 598 323 200 octets ; le téléchargement compressé représente environ 1,25 Go.\n\nLes essais en machine virtuelle ont réussi avec le BIOS classique, l’UEFI et Secure Boot activé et appliqué. Les contrôles SSH ont vérifié la clé publique prévue, le rejet d’une autre clé et la désactivation de la connexion par mot de passe. Les essais de démarrage ont également vérifié une nouvelle identité de machine et les informations de la console locale.\n\nLe ZIP assemblé a été extrait et vérifié avec des outils Linux indépendants. L’extraction avec l’Explorateur Windows natif et le démarrage sur du matériel USB réel restent à tester : aucun environnement Windows adapté ni matériel physique dédié n’a encore été disponible. Les résultats en machine virtuelle ne garantissent pas la compatibilité avec tous les ordinateurs et périphériques USB.\n\nDebRescueStick est un projet indépendant, pas un produit officiel de Debian. Debian et les logiciels inclus conservent leurs droits d’auteur et licences respectifs.\n\n"
+              }
+            ],
+            "title": "Tests et compatibilité"
+          },
+          {
+            "description": "",
+            "id": "page-e5bb0698fb84d314dadeb5b4",
+            "modules": [
+              {
+                "id": "mod-8ea000dadb396d53d738b492",
+                "value": "Guide et sources"
+              },
+              {
+                "id": "mod-9702bc539994bd802de28413",
+                "value": "Préparer votre clé SSH et votre clé USB\n\nUtilisez uniquement votre clé SSH publique (généralement un fichier se terminant par .pub). Gardez la clé privée correspondante sur l’ordinateur depuis lequel vous vous connecterez. Extrayez le ZIP téléchargé pour obtenir le fichier .img. L’écriture de l’image efface la clé USB sélectionnée : choisissez soigneusement le périphérique USB entier, pas une partition ni un disque interne.\n\nLinux\n\nIdentifiez le périphérique USB avec lsblk et démontez ses partitions montées. Remplacez /dev/sdX par ce périphérique entier et utilisez le nom réel du fichier extrait :\n\nsudo dd if=DebRescueStick-amd64.img of=/dev/sdX bs=4M conv=fsync,nocreat status=progress\n\nmacOS\n\nIdentifiez le périphérique USB avec diskutil list. Remplacez diskN et rdiskN par les noms appropriés et utilisez le nom réel du fichier extrait :\n\ndiskutil unmountDisk /dev/diskN && sudo dd if=DebRescueStick-amd64.img of=/dev/rdiskN bs=4m && sync && diskutil eject /dev/diskN\n\nAutres systèmes Unix\n\nAprès avoir identifié le périphérique USB entier et démonté ses partitions, utilisez le dd du système avec bs=1048576, puis exécutez sync avant de retirer la clé. Les noms des périphériques et les options de dd varient selon le système.\n\nWindows\n\nExtrayez le ZIP, puis sélectionnez le fichier .img extrait et la bonne clé USB dans un outil d’écriture d’image tel que Rufus. Si un mode d’écriture est demandé, choisissez le mode image DD. Attendez la fin de l’écriture avant de retirer la clé.\n\nDémarrer et se connecter\n\nDémarrez le PC cible depuis la clé et connectez-le à un réseau filaire avec DHCP. Le moniteur local affiche le nom réseau réel, les adresses IP, l’état du service SSH et les empreintes des clés d’hôte. Si le DNS multicast est disponible, connectez-vous avec :\n\nssh root@debrstick.local\n\nPour une clé privée placée hors des emplacements par défaut du client SSH :\n\nssh -i PATH-TO-PRIVATE-KEY root@debrstick.local\n\nSi le nom ne peut pas être résolu, utilisez une adresse IP affichée sur le moniteur. En cas de conflit de noms, la clé peut recevoir un autre nom .local. Comparez l’empreinte de la clé d’hôte SSH avec celle affichée sur le moniteur de la clé USB avant d’accepter la connexion. L’authentification SSH par mot de passe est désactivée.\n\nLogiciel libre\n\nLes logiciels propres au projet, les outils de construction et les tests sont publiés sous GPL-3.0-or-later. Debian et les autres composants inclus conservent leurs licences respectives. Le dépôt GitHub contient les sources du projet ; les sources correspondantes exactes de chaque image Debian distribuée sont proposées séparément avec cette image.\n\n"
+              },
+              {
+                "id": "mod-module-1dd60869013b5b54de5f4f2e5da87392",
+                "value": "Sources du projet sur GitHub"
+              },
+              {
+                "id": "mod-module-bda5c6ab958b4fecbd58cc0d4d67d159",
+                "value": "Sources de l’image Debian"
+              }
+            ],
+            "title": "Guide et sources"
+          }
+        ]
+      },
+      {
+        "locale": "es",
+        "pages": [
+          {
+            "description": "",
+            "id": "page-c51ff0bd91b3e52db181de72",
+            "modules": [
+              {
+                "id": "mod-19c6fb3c01ecadc1894c06a6",
+                "value": "DebRescueStick"
+              },
+              {
+                "id": "mod-6b3af2b6936b0b23839b48b3",
+                "value": "DebRescueStick es un sistema de rescate USB independiente basado en Debian, con acceso SSH preparado para tu propia clave pública.\n\nArranca un ordenador desde la memoria USB, conéctalo a una red por cable e inicia sesión desde otro ordenador. Tu clave SSH privada permanece contigo. La consola de rescate muestra el nombre de red, las direcciones IP y las huellas de las claves del servidor.\n\n"
+              }
+            ],
+            "title": "DebRescueStick"
+          },
+          {
+            "description": "",
+            "id": "page-3d9f654e66fad14e8f7a3e79",
+            "modules": [
+              {
+                "id": "mod-335b846fb5d0283c90c39a12",
+                "value": "Pruebas y compatibilidad"
+              },
+              {
+                "id": "mod-77fa465f949f4003c72ff18a",
+                "value": "DebRescueStick utiliza Debian 13 y está diseñado para PC x86 de 64 bits (amd64). Usa una memoria USB con una capacidad nominal de al menos 16 GB. La imagen extraída ocupa 8.598.323.200 bytes; la descarga comprimida ronda los 1,25 GB.\n\nLas pruebas en máquinas virtuales se superaron con BIOS clásico, UEFI y Secure Boot activado y aplicado. Las pruebas SSH comprobaron la clave pública prevista, el rechazo de otra clave y la desactivación del acceso por contraseña. También se verificaron una nueva identidad de la máquina y la información de la consola local durante el arranque.\n\nEl ZIP ensamblado se extrajo y comprobó con herramientas independientes de Linux. La extracción con el Explorador de Windows nativo y el arranque desde hardware USB físico siguen sin probarse: todavía no se ha dispuesto de un entorno Windows adecuado ni de hardware físico dedicado. Los resultados en máquinas virtuales no garantizan la compatibilidad con todos los ordenadores y dispositivos USB.\n\nDebRescueStick es un proyecto independiente, no un producto oficial de Debian. Debian y el software incluido conservan sus propios derechos de autor y licencias.\n\n"
+              }
+            ],
+            "title": "Pruebas y compatibilidad"
+          },
+          {
+            "description": "",
+            "id": "page-e5bb0698fb84d314dadeb5b4",
+            "modules": [
+              {
+                "id": "mod-8ea000dadb396d53d738b492",
+                "value": "Guía y código fuente"
+              },
+              {
+                "id": "mod-9702bc539994bd802de28413",
+                "value": "Preparar la clave SSH y la memoria USB\n\nUsa únicamente tu clave SSH pública (normalmente un archivo terminado en .pub). Conserva la clave privada correspondiente en el ordenador desde el que te conectarás. Extrae el ZIP descargado para obtener el archivo .img. La escritura de la imagen borra la memoria USB seleccionada: elige con cuidado el dispositivo USB completo, no una partición ni un disco interno.\n\nLinux\n\nIdentifica el dispositivo USB con lsblk y desmonta sus particiones montadas. Sustituye /dev/sdX por ese dispositivo completo y usa el nombre real del archivo extraído:\n\nsudo dd if=DebRescueStick-amd64.img of=/dev/sdX bs=4M conv=fsync,nocreat status=progress\n\nmacOS\n\nIdentifica el dispositivo USB con diskutil list. Sustituye diskN y rdiskN por los nombres adecuados y usa el nombre real del archivo extraído:\n\ndiskutil unmountDisk /dev/diskN && sudo dd if=DebRescueStick-amd64.img of=/dev/rdiskN bs=4m && sync && diskutil eject /dev/diskN\n\nOtros sistemas Unix\n\nTras identificar el dispositivo USB completo y desmontar sus particiones, usa el dd del sistema con bs=1048576 y ejecuta después sync antes de retirar la memoria. Los nombres de los dispositivos y las opciones de dd varían entre sistemas.\n\nWindows\n\nExtrae el ZIP y selecciona el archivo .img extraído y la memoria USB correcta en una herramienta de escritura de imágenes como Rufus. Si se pregunta por el método de escritura, elige el modo de imagen DD. Espera a que termine la escritura antes de retirar la memoria.\n\nArrancar y conectar\n\nArranca el PC de destino desde la memoria USB y conéctalo a una red por cable con DHCP. El monitor local muestra el nombre de red real, las direcciones IP, el estado de SSH y las huellas de las claves del servidor. Si está disponible el DNS multidifusión, conecta con:\n\nssh root@debrstick.local\n\nPara una clave privada situada fuera de las ubicaciones predeterminadas del cliente SSH:\n\nssh -i PATH-TO-PRIVATE-KEY root@debrstick.local\n\nSi el nombre no se resuelve, usa una dirección IP que aparezca en el monitor. Un conflicto de nombres puede asignar a la memoria otro nombre .local. Compara la huella de la clave del servidor SSH con la que aparece en el monitor de la memoria USB antes de aceptar la conexión. El acceso SSH mediante contraseña está desactivado.\n\nCódigo abierto\n\nEl software propio del proyecto, las herramientas de construcción y las pruebas se publican bajo GPL-3.0-or-later. Debian y los demás componentes incluidos conservan sus propias licencias. El repositorio de GitHub contiene las fuentes del proyecto; las fuentes correspondientes exactas de cada imagen Debian distribuida se ofrecen por separado junto con esa imagen.\n\n"
+              },
+              {
+                "id": "mod-module-1dd60869013b5b54de5f4f2e5da87392",
+                "value": "Código fuente del proyecto en GitHub"
+              },
+              {
+                "id": "mod-module-bda5c6ab958b4fecbd58cc0d4d67d159",
+                "value": "Fuentes de la imagen Debian"
+              }
+            ],
+            "title": "Guía y código fuente"
+          }
+        ]
+      }
+    ],
+    "pages": [
+      {
+        "description": "",
+        "id": "page-c51ff0bd91b3e52db181de72",
+        "path": "",
+        "title": "DebRescueStick",
+        "modules": [
+          {
+            "id": "mod-19c6fb3c01ecadc1894c06a6",
+            "type": "heading",
+            "value": "DebRescueStick"
+          },
+          {
+            "id": "mod-6b3af2b6936b0b23839b48b3",
+            "type": "text",
+            "value": "DebRescueStick is an independent Debian-based USB rescue system with SSH access prepared for your own public key.\n\nBoot a computer from the stick, connect it to a wired network and sign in from another computer. Your private SSH key stays with you. The rescue console displays its network name, IP addresses and host key fingerprints.",
+            "designTokens": {
+              "font": "modern",
+              "size": "regular",
+              "color": "ink",
+              "alignment": "start",
+              "spacing": "airy"
+            }
+          }
+        ]
+      },
+      {
+        "description": "",
+        "id": "page-3d9f654e66fad14e8f7a3e79",
+        "path": "progress",
+        "title": "Tests and compatibility",
+        "modules": [
+          {
+            "id": "mod-335b846fb5d0283c90c39a12",
+            "type": "heading",
+            "value": "Tests and compatibility"
+          },
+          {
+            "id": "mod-77fa465f949f4003c72ff18a",
+            "type": "text",
+            "value": "DebRescueStick is built for 64-bit x86 PCs (amd64), using Debian 13. Use a USB stick with a nominal capacity of at least 16 GB. The extracted image is 8,598,323,200 bytes; the compressed download is about 1.25 GB.\n\nVirtual-machine checks passed for legacy BIOS, UEFI and enforced Secure Boot. SSH checks covered the intended public key, rejection of a different key and disabled password login. Boot checks also covered fresh machine identity and the information shown on the local console.\n\nThe assembled ZIP has been extracted and checked with independent Linux tools. Native Windows Explorer extraction and booting on physical USB hardware are still untested: a suitable Windows test environment and dedicated physical test hardware have not yet been available. Virtual-machine results do not establish compatibility with every computer or USB device.\n\nDebRescueStick is an independent project. It is not an official Debian product. Debian and the included software retain their own copyrights and licences.\n\n",
+            "designTokens": {
+              "font": "modern",
+              "size": "regular",
+              "color": "ink",
+              "alignment": "start",
+              "spacing": "airy"
+            }
+          }
+        ]
+      },
+      {
+        "description": "",
+        "id": "page-e5bb0698fb84d314dadeb5b4",
+        "path": "documents",
+        "title": "Guide and sources",
+        "modules": [
+          {
+            "id": "mod-8ea000dadb396d53d738b492",
+            "type": "heading",
+            "value": "Guide and sources"
+          },
+          {
+            "id": "mod-9702bc539994bd802de28413",
+            "type": "text",
+            "value": "Prepare your key and USB stick\n\nUse only your SSH public key (usually a file ending in .pub). Keep the matching private key on the computer from which you will connect. Extract the downloaded ZIP to obtain the .img file. Writing the image erases the selected USB stick; choose the whole USB device carefully, not a partition or an internal disk.\n\nLinux\n\nUse lsblk to identify the USB device and unmount its mounted partitions. Replace /dev/sdX with that whole device and use the actual extracted filename:\n\nsudo dd if=DebRescueStick-amd64.img of=/dev/sdX bs=4M conv=fsync,nocreat status=progress\n\nmacOS\n\nUse diskutil list to identify the USB device. Replace diskN and rdiskN with the matching device names, and use the actual extracted filename:\n\ndiskutil unmountDisk /dev/diskN && sudo dd if=DebRescueStick-amd64.img of=/dev/rdiskN bs=4m && sync && diskutil eject /dev/diskN\n\nOther Unix systems\n\nAfter identifying and unmounting the whole USB device, use the system's dd with bs=1048576, then run sync before removing the stick. Device names and dd options vary between systems.\n\nWindows\n\nExtract the ZIP, then select the extracted .img file and the correct USB stick in an image-writing tool such as Rufus. If prompted for a write method, choose DD image mode. Wait for writing to finish before removing the stick.\n\nBoot and connect\n\nBoot the target PC from the stick and connect it to a wired network with DHCP. The local monitor shows the actual network name, IP addresses, SSH readiness and host key fingerprints. With multicast DNS available, connect using:\n\nssh root@debrstick.local\n\nFor a private key stored outside your SSH client's default locations:\n\nssh -i PATH-TO-PRIVATE-KEY root@debrstick.local\n\nIf the name cannot be resolved, use an IP address shown on the monitor. A name collision may give the stick a different .local name. Compare the SSH host key fingerprint with the one on the stick's monitor before accepting the connection. Password login over SSH is disabled.\n\nOpen source\n\nThe project's own software, build tools and tests are published under GPL-3.0-or-later. Debian and other included components keep their own licences. The GitHub repository contains the project sources; the exact corresponding sources for each distributed Debian image are provided separately with that image.\n\n",
+            "designTokens": {
+              "font": "modern",
+              "size": "regular",
+              "color": "ink",
+              "alignment": "start",
+              "spacing": "airy"
+            }
+          },
+          {
+            "id": "mod-module-1dd60869013b5b54de5f4f2e5da87392",
+            "type": "link",
+            "value": "Project source code on GitHub",
+            "href": "https://github.com/icybiz/debrescuestick",
+            "layoutRuleId": "stacked"
+          },
+          {
+            "id": "mod-module-bda5c6ab958b4fecbd58cc0d4d67d159",
+            "type": "link",
+            "value": "Corresponding Debian image sources",
+            "href": "https://eorls.com/debrescuestick/sources/fd4ff0918e30b11ffe4b992929c9c62f520b1b6919d9b79891f88c4ccd045a9a/",
+            "layoutRuleId": "stacked"
+          }
+        ]
+      }
+    ],
+    "navigation": [
+      "page-c51ff0bd91b3e52db181de72",
+      "page-e5bb0698fb84d314dadeb5b4",
+      "page-3d9f654e66fad14e8f7a3e79"
+    ],
+    "legalProfile": {
+      "schemaVersion": 5,
+      "jurisdiction": "",
+      "ownerKind": "",
+      "mediaScope": "",
+      "commercialScope": "",
+      "regulatedScope": "",
+      "ownerName": "",
+      "ownerResidence": "",
+      "businessObject": "",
+      "geographicAddress": "",
+      "publicEmail": "",
+      "registerStatus": "",
+      "registerName": "",
+      "registerNumber": "",
+      "vatStatus": "",
+      "vatId": "",
+      "editorialLine": "",
+      "confirmation": "UNCONFIRMED",
+      "privacyEmail": "",
+      "inquiryPurpose": "",
+      "inquiryLegalBasis": "",
+      "inquiryRetention": "",
+      "processingTerms": "UNACCEPTED",
+      "inquiryConfirmation": "UNCONFIRMED",
+      "forumPurpose": "",
+      "forumRules": "UNACCEPTED",
+      "forumConfirmation": "UNCONFIRMED",
+      "legalForm": "",
+      "registerCourt": "",
+      "tradeAuthority": "",
+      "tradeChamber": "",
+      "professionalTitle": "",
+      "professionalCountry": "",
+      "professionalRulesUrl": "",
+      "gisaNumber": ""
+    },
+    "siteDesign": {
+      "theme": "signal",
+      "font": "modern",
+      "shape": "soft",
+      "density": "comfortable",
+      "symbols": "outline",
+      "brand": "title",
+      "header": "navigation",
+      "footer": "hidden",
+      "width": "wide"
+    },
+    "siteLocale": "en"
+  },
+  "files": [],
+  "media": []
+}

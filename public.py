@@ -14,7 +14,7 @@ SUFFIXES = {'.py', '.sh', '.service', '.conf', '.txt', '.js', '.mjs',
 
 def files(root=ROOT):
     result = {p.name: p for pattern in ('*.py', '*.sh', '*.js', '*.mjs', '*.ps1') for p in root.glob(pattern)}
-    for name in ('.gitignore', 'COPYING', 'NOTICE', 'debian.lock.json', 'ps.lock.json', 'operator.env.example'):
+    for name in ('.gitignore', 'COPYING', 'NOTICE', 'debian.lock.json', 'ps.lock.json', 'operator.env.example', 'API.md', 'site.json'):
         result[name] = root / name
     result['README.md'] = root / ('PUBLIC.md' if (root / 'PUBLIC.md').is_file() else 'README.md')
     for directory in DIRECTORIES:

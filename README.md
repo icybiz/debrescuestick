@@ -4,6 +4,15 @@ A Debian-based USB rescue environment with SSH access through your own public
 key. The short network name is **debrstick.local**. Website:
 [eorls.com/debrescuestick](https://eorls.com/debrescuestick/).
 
+The public website is being rebuilt through the ordinary EORLS customer editor.
+The native `site.json` draft contains the English, German, French and Spanish
+content and layout, with operator-specific details left empty. The general image
+service integration is not yet available in the EORLS editor; the old standalone
+HTML frontend is no longer served as the EORLS project page. The image backend and
+its exact Debian sources are retained. See [API.md](API.md) for the existing public
+service contract and its retry/recovery limitations. Do not reinstall the old
+frontend or its broad reverse-proxy route over an EORLS customer website.
+
 This repository contains the complete original project software: the website,
 HTTP backend, queue, image builder, boot scripts, deployment and qualification
 tools, and automated tests. Operator credentials, runtime data, image binaries
@@ -29,8 +38,9 @@ disabled. The local rescue console provides root access to someone physically
 at the machine. New host keys and machine identity are generated during boot.
 
 The image contains Debian rescue tools including GNU ddrescue, TestDisk,
-smartmontools, GParted, cryptsetup and rsync. The website is available in English,
-German, French and Spanish, with local appearance, width and font preferences.
+smartmontools, GParted, cryptsetup and rsync. The native website draft has English, German, French and Spanish editions.
+Public visitor language/appearance behavior still needs acceptance after the
+normal EORLS integration; editor preferences are not a substitute for that test.
 The image is AMD64; writing it from an ARM Mac does not make it ARM-bootable.
 
 ## Architecture
@@ -73,7 +83,7 @@ sh -n image/keys.sh
 bash -n image/info.sh
 ```
 
-Run a local web preview without image generation:
+Run the historical standalone frontend locally without image generation:
 
 ```sh
 python3 server.py --state state --port 8080
