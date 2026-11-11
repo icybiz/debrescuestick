@@ -1,7 +1,11 @@
 # Public image-service API
 
-This is the **existing** DebRescueStick image API used by the specialized image
-service. It is separate from EORLS website editing: create and maintain the EORLS
+This contract describes the DebRescueStick image API in this source revision.
+The request-key extension is a candidate until its deployment is confirmed; an
+older running service can still ignore `request_key`. Do not enable an adapter
+on the public service solely because this source document has been updated.
+
+For EORLS website editing: create and maintain the EORLS
 website through its normal customer UI. The old standalone HTML frontend is no
 longer the public EORLS page.
 
@@ -13,22 +17,22 @@ needed to use this description. Examples below use placeholders, not live jobs.
 
 ## Important integration limits
 
-- Start is **not idempotent**. There is no request-key parameter, supported
-  `Idempotency-Key` header, public job search or lookup by fingerprint.
-- If the start response is lost after acceptance, the client cannot recover the
-  job ID from another endpoint. Do not silently retry an indeterminate POST or
-  claim exactly-once submission. A future recovery extension needs a separate
-  implementation and qualification; it is not provided by this document.
+- Start without `request_key` is **not idempotent**. If that response is lost,
+  there is no way to recover its job ID. Do not silently retry an indeterminate
+  legacy start.
+- Optional request-key recovery is described below. It requires the matching
+  qualified backend deployment. No `Idempotency-Key` header, public job search or
+  lookup by fingerprint exists.
 - No public cancellation, job listing or deletion endpoint exists.
 - Rate control uses the client address observed by the public edge. A server-side
   adapter may therefore share one rate-limit identity across visitors. There is
   no public authenticated per-visitor identity override in this contract.
 - Status has no percentage, ETA or queue position. It exposes states only.
 
-An EORLS adapter should persist the returned job ID before acknowledging a
-successful start to its visitor. It must still handle a lost or indeterminate
-start separately. Native EORLS public work links do not by themselves add
-idempotency to this backend.
+An EORLS adapter must retain the same secret request key across retries and
+process restarts, and stop restarting the action when its own work link expires.
+A returned job ID and its immutable deadlines/result identity must also be kept.
+Native EORLS work links alone do not add recovery to an older backend.
 
 ## Availability and corresponding sources
 
@@ -57,7 +61,8 @@ URL returned by the service rather than guessing a base hash.
 
 Send `Content-Type: application/json` and a fixed `Content-Length`. The complete
 UTF-8 JSON body must be between 1 and 20,000 bytes. Chunked request bodies are not
-supported. The input object has one required property:
+supported. The input object has one required property (`public_key`) and an optional
+`request_key` for the qualified recovery extension:
 
 ```json
 {"public_key": "ssh-ed25519 <base64-public-key-data> optional comment"}
@@ -97,8 +102,63 @@ keep it out of analytics/referrers/logs and do not publish it. The record never
 returns the submitted public-key line; `fingerprint` is its OpenSSH SHA256
 fingerprint. Do not use the fingerprint as a substitute for the secret job ID.
 
-Additional JSON properties are not a recovery mechanism. In particular, sending
-a made-up request ID does not cause the service to deduplicate requests.
+Only `request_key` enables recovery; arbitrary request IDs, fingerprints and
+additional JSON properties are not deduplication mechanisms.
+
+## Optional request-key recovery
+
+For one logical attempt, generate **32 cryptographically random bytes** and encode
+them as exactly 64 lowercase hexadecimal characters. Keep that value secret and
+send it on every start/retry as `request_key`:
+
+```json
+{"public_key": "ssh-ed25519 <base64-public-key-data>", "request_key": "<64-lowercase-hex-secret>"}
+```
+
+The placeholder is not a valid key. Null, empty, uppercase, non-hex or incorrectly
+sized values return HTTP 400. Only a hash of the request key is stored. Treat the
+raw key like a personal download capability; never put it in analytics or logs.
+
+The first successful acceptance binds that key atomically to one job and the
+normalized public-key fingerprint. Concurrent starts, a lost response and a
+process/database-connection restart keep the **same job ID**, original `created`
+and `expires`, and any completed result identity. Whitespace/comments discarded
+by the public-key parser do not change that binding. The same key with different
+normalized input returns **409 Conflict**, without changing the job or limits.
+
+A matching replay returns HTTP **202** and the current public job record, even
+when the worker is unavailable, the new-job queue is full or a client is in
+cooldown. It creates no job, consumes no new slot and does not extend cooldown.
+A failed job remains the same `failed` job; a retry does not start it again.
+A deliberate new attempt requires a new request key.
+
+`GET /debrescuestick/api/requests/<request_key>` recovers the job ID after a lost
+start response. It returns HTTP **200** with the same current record while the
+job is unexpired, including a `failed` record. It needs neither a running worker
+nor the original client address. An unknown key returns **404**; malformed keys
+return **400**.
+
+Image and download lifetime remains **two hours from acceptance**. The binding is
+retained for **24 hours from acceptance**, without extension by retry, polling or
+reload. During the remaining recovery window, start/recovery of a known expired
+job returns HTTP **410**:
+
+```json
+{"error": "The download has expired.", "job": {"id": "<original-job-id>", "fingerprint": "SHA256:<fingerprint>", "created": 1700000000, "expires": 1700007200, "state": "expired", "bytes": null, "sha256": null, "error": null}}
+```
+
+The nested record retains the original identity and any completed ZIP length/hash;
+`state` is `expired` and its files are unavailable. It never silently becomes a
+new job during the window. Normal job-ID status/download endpoints still return
+404 after the two-hour deadline. The retained record holds no submitted public
+key line. Expired metadata is removed by bounded worker maintenance.
+
+After the 24-hour recovery window, lookup returns **404** and deduplication is no
+longer guaranteed. **Do not reuse or retry an old request key beyond that window.**
+Clients must track a conservative deadline from work-link creation/first attempt,
+not extend it after recovery. The initial EORLS binding allows at most 24 hours
+from work-link issue; backend acceptance occurs later and covers that lifetime.
+A longer future binding needs a new lifetime agreement before activation.
 
 ## Read job state
 
@@ -120,8 +180,8 @@ Human-readable error text is not a stable machine error code.
 
 The default lifetime is **7,200 seconds from acceptance**, including queue time.
 It is not extended when the job becomes ready or when it is polled/downloaded.
-After expiry, status and download access return HTTP 404. There is no public
-`expired` job state to poll successfully after the deadline.
+After expiry, status and download access return HTTP 404. The request-key recovery endpoint separately reports a known expiry with
+HTTP 410 and an `expired` record during its recovery window.
 
 The default queue admits at most **three unexpired jobs other than failed
 jobs**, including ready jobs. A client address can create at most one request
@@ -174,7 +234,9 @@ Application errors are JSON objects containing an `error` string. In particular:
 
 | HTTP status | Situation |
 | --- | --- |
-| 400 | Invalid JSON/request size, missing or invalid public key. |
+| 400 | Invalid JSON/request size, public key or recovery request key. |
+| 409 | A request key is already bound to different normalized input. |
+| 410 | A known request-key job expired within its recovery window; includes `job`. |
 | 403 | A supplied Origin does not match the service origin. |
 | 415 | POST content type is not `application/json`. |
 | 429 | Client cooldown or queue capacity reached; no job was created. |
@@ -191,4 +253,5 @@ return HTTP 405.
 JSON and download responses use `Cache-Control: no-store` and
 `Referrer-Policy: no-referrer`. Keep personal job capabilities separate from public
 source links. Log only redacted operation/state information and never private
-SSH keys, submitted key material or complete personal status/download URLs.
+SSH keys, submitted key material, request keys or complete personal recovery,
+status and download URLs.

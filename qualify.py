@@ -18,9 +18,10 @@ from keys import public_key
 import worker
 import fast
 import mdns
+import replay
 
 ROOT=Path(__file__).resolve().parent
-FILES=('qualify.py','base.py','worker.py','store.py','keys.py','fast.py','mdns.py','COPYING','NOTICE')
+FILES=('qualify.py','base.py','worker.py','store.py','keys.py','fast.py','mdns.py','server.py','replay.py','COPYING','NOTICE')
 
 
 def qa_unit(token):return 'debrescuestick-qa-worker-'+base.key(token)
@@ -227,7 +228,7 @@ cat /sys/kernel/security/lockdown
         return record
 
 
-def run(token,template,bundle_sha):
+def run(token,template,bundle_sha,queue=False):
     worker.require_host();base.key(token);base.key(template)
     manifest={name:base.digest(ROOT/name) for name in FILES}
     if hashlib.sha256(json.dumps(manifest,sort_keys=True).encode()).hexdigest()!=bundle_sha:
@@ -248,31 +249,41 @@ def run(token,template,bundle_sha):
         for name in ('a','b'):
             subprocess.run(['ssh-keygen','-q','-t','ed25519','-N','','-C','DebRescueStick-ephemeral-QA',
                             '-f',str(path/('key-'+name))],check=True)
-        for index,firmware in enumerate(('bios','uefi','secure')):
-            owner=path/('key-'+('a' if index%2==0 else 'b'));wrong=path/('key-'+('b' if index%2==0 else 'a'))
-            key,fingerprint=public_key(Path(str(owner)+'.pub').read_text())
-            job={'id':secrets.token_hex(24),'key':key,'fingerprint':fingerprint}
-            base.write(path/'progress.json',{'phase':'personalize','firmware':firmware})
-            started=time.perf_counter();output=worker.personalize(path,job)
-            elapsed=time.perf_counter()-started
-            if 'fast' in proof:materialize(output,target/'fast/prefix.zip',proof['bytes'])
-            base.write(path/'progress.json',{'phase':'boot-ssh','firmware':firmware})
-            result=boot(path,output/'image.img',owner,wrong,firmware)
-            result['personalization_seconds']=elapsed
-            if 'fast' in proof:result['archive']=json.loads((output/'archive.json').read_text())
-            results.append(result)
-        if len({row['machine_id'] for row in results})!=len(results) or len({row['host_key'] for row in results})!=len(results):
-            raise RuntimeError('Personal images share host identity')
-        if base.digest(target/'base.img')!=proof['sha256']:raise RuntimeError('Cold template was modified by qualification')
-        record.update(success=True,results=results,key_isolation=True,ssh_positive_negative=True,
-                      architecture='amd64',sha256=proof['sha256'],qualified=True,secure_boot=True,mdns=True,console=True,own_license=True,hostname=mdns.HOST_NAME)
+        if queue:
+            base.write(path/'progress.json',{'phase':'queue-replay'})
+            queue_result=replay.qualify(path)
+            if base.digest(target/'base.img')!=proof['sha256']:raise RuntimeError('Cold template was modified')
+            record.update(success=True,queue_replay=queue_result,sha256=proof['sha256'])
+        else:
+            for index,firmware in enumerate(('bios','uefi','secure')):
+                owner=path/('key-'+('a' if index%2==0 else 'b'));wrong=path/('key-'+('b' if index%2==0 else 'a'))
+                key,fingerprint=public_key(Path(str(owner)+'.pub').read_text())
+                job={'id':secrets.token_hex(24),'key':key,'fingerprint':fingerprint}
+                base.write(path/'progress.json',{'phase':'personalize','firmware':firmware})
+                started=time.perf_counter();output=worker.personalize(path,job)
+                elapsed=time.perf_counter()-started
+                if 'fast' in proof:materialize(output,target/'fast/prefix.zip',proof['bytes'])
+                base.write(path/'progress.json',{'phase':'boot-ssh','firmware':firmware})
+                result=boot(path,output/'image.img',owner,wrong,firmware)
+                result['personalization_seconds']=elapsed
+                if 'fast' in proof:result['archive']=json.loads((output/'archive.json').read_text())
+                results.append(result)
+            if len({row['machine_id'] for row in results})!=len(results) or len({row['host_key'] for row in results})!=len(results):
+                raise RuntimeError('Personal images share host identity')
+            if base.digest(target/'base.img')!=proof['sha256']:raise RuntimeError('Cold template was modified by qualification')
+            record.update(success=True,results=results,key_isolation=True,ssh_positive_negative=True,
+                          architecture='amd64',sha256=proof['sha256'],qualified=True,secure_boot=True,mdns=True,console=True,own_license=True,hostname=mdns.HOST_NAME)
     except Exception as error:record['error']=type(error).__name__+': '+str(error)
+    finally:
+        if queue:
+            for name in ('key-a','key-a.pub','key-b','key-b.pub'):
+                (path/name).unlink(missing_ok=True)
     record['finished']=time.time();base.write(path/'result.json',record)
     print(json.dumps({k:record.get(k) for k in ('success','error','sha256','qualified')}),flush=True)
     return 0 if record['success'] else 1
 
 
-def submit(token,template):
+def submit(token,template,queue=False):
     base.key(token);base.key(template)
     files={name:(ROOT/name).read_bytes() for name in FILES}
     manifest={name:hashlib.sha256(raw).hexdigest() for name,raw in files.items()}
@@ -300,11 +311,12 @@ argv=['systemd-run','--setenv=DRS_BUILD_HOST='+HOSTNAME,'--unit='+UNIT,'--proper
  '--property=MemorySwapMax=0','--property=Nice=10','--property=IOWeight=10',
  '--property=TasksMax=128','--property=RuntimeMaxSec=1800','--property=TimeoutStopSec=45',
  '/usr/bin/python3',str(code/'qualify.py'),'run','--key',KEY,'--template',TEMPLATE,'--sha',SHA]
+if QUEUE:argv.append('--queue')
 subprocess.run(argv,capture_output=True,text=True,check=True,timeout=20)
-print(json.dumps({'unit':UNIT,'key':KEY,'template_job':TEMPLATE,'bundle_sha256':SHA,'files':MANIFEST}))
+print(json.dumps({'unit':UNIT,'key':KEY,'template_job':TEMPLATE,'bundle_sha256':SHA,'files':MANIFEST,'queue':QUEUE}))
 '''
     values={'HOSTNAME':base.HOSTNAME,'KEY':token,'TEMPLATE':template,'UNIT':qa_unit(token),'SHA':sha,
-            'FILES':{name:base64.b64encode(raw).decode() for name,raw in files.items()},'MANIFEST':manifest}
+            'FILES':{name:base64.b64encode(raw).decode() for name,raw in files.items()},'MANIFEST':manifest,'QUEUE':queue}
     result=base.remote('\n'.join(n+'='+repr(v) for n,v in values.items())+'\n'+code)
     base.write(ROOT/'artifacts'/('qa-job-'+token+'.json'),result);return result
 
@@ -329,7 +341,7 @@ print(json.dumps(value))
 
 if __name__=='__main__':
     p=argparse.ArgumentParser(description=__doc__);p.add_argument('action',choices=('submit','status','run'))
-    p.add_argument('--key');p.add_argument('--template');p.add_argument('--sha');p.add_argument('--verbose',action='store_true');a=p.parse_args()
-    if a.action=='run':raise SystemExit(run(a.key,a.template,a.sha))
-    result=submit(a.key or secrets.token_hex(5),a.template) if a.action=='submit' else status(a.key)
+    p.add_argument('--key');p.add_argument('--template');p.add_argument('--sha');p.add_argument('--queue',action='store_true');p.add_argument('--verbose',action='store_true');a=p.parse_args()
+    if a.action=='run':raise SystemExit(run(a.key,a.template,a.sha,a.queue))
+    result=submit(a.key or secrets.token_hex(5),a.template,a.queue) if a.action=='submit' else status(a.key)
     print(json.dumps(result if a.action=='submit' or a.verbose else base.brief(result)))

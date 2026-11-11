@@ -127,7 +127,10 @@ const UI = (() => {
       "The request does not belong to this website.": "The request does not belong to this website.",
       "Expected JSON.": "Expected JSON.",
       "Invalid request.": "Invalid request.",
-      "Image preparation is currently unavailable. Please try again later.": "Image preparation is currently unavailable. Please try again later."
+      "Image preparation is currently unavailable. Please try again later.": "Image preparation is currently unavailable. Please try again later.",
+      "Invalid request key.": "Invalid request key.",
+      "The request key is already bound to different input.": "The request key is already bound to different input.",
+      "The request recovery window has expired.": "The request recovery window has expired."
     },
     "linuxTitle": "Linux (GNU dd)",
     "linuxWrite": "Open a terminal in the directory containing the extracted IMG file. Identify the USB stick with <code>lsblk -o NAME,SIZE,MODEL,TYPE,MOUNTPOINT</code>. Unmount every mounted partition of that stick first, for example with <code>sudo umount /dev/sdX1</code>. Replace <code>/dev/sdX</code> below with the whole USB device, not a partition such as <code>/dev/sdX1</code>.",
@@ -265,7 +268,10 @@ const UI = (() => {
       "The request does not belong to this website.": "Die Anfrage gehört nicht zu dieser Website.",
       "Expected JSON.": "Eine JSON-Anfrage wird erwartet.",
       "Invalid request.": "Ungültige Anfrage.",
-      "Image preparation is currently unavailable. Please try again later.": "Die Image-Vorbereitung ist derzeit nicht verfügbar. Bitte versuche es später erneut."
+      "Image preparation is currently unavailable. Please try again later.": "Die Image-Vorbereitung ist derzeit nicht verfügbar. Bitte versuche es später erneut.",
+      "Invalid request key.": "Ungültige Wiederholungskennung.",
+      "The request key is already bound to different input.": "Die Wiederholungskennung gehört bereits zu einer anderen Eingabe.",
+      "The request recovery window has expired.": "Die Wiederherstellungsfrist ist abgelaufen."
     },
     "linuxTitle": "Linux (GNU dd)",
     "linuxWrite": "Öffne ein Terminal im Verzeichnis der entpackten IMG-Datei. Ermittle den USB-Stick mit <code>lsblk -o NAME,SIZE,MODEL,TYPE,MOUNTPOINT</code>. Hänge vorher jede eingehängte Partition dieses Sticks aus, zum Beispiel mit <code>sudo umount /dev/sdX1</code>. Ersetze unten <code>/dev/sdX</code> durch das gesamte USB-Gerät, nicht durch eine Partition wie <code>/dev/sdX1</code>.",
@@ -403,7 +409,10 @@ const UI = (() => {
       "The request does not belong to this website.": "La demande ne provient pas de ce site.",
       "Expected JSON.": "Une demande JSON est attendue.",
       "Invalid request.": "Demande non valide.",
-      "Image preparation is currently unavailable. Please try again later.": "La préparation d’images est momentanément indisponible. Réessayez plus tard."
+      "Image preparation is currently unavailable. Please try again later.": "La préparation d’images est momentanément indisponible. Réessayez plus tard.",
+      "Invalid request key.": "Clé de reprise non valide.",
+      "The request key is already bound to different input.": "La clé de reprise est déjà liée à une autre entrée.",
+      "The request recovery window has expired.": "Le délai de reprise de la demande a expiré."
     },
     "linuxTitle": "Linux (GNU dd)",
     "linuxWrite": "Ouvrez un terminal dans le dossier contenant le fichier IMG décompressé. Identifiez la clé USB avec <code>lsblk -o NAME,SIZE,MODEL,TYPE,MOUNTPOINT</code>. Démontez d’abord toutes ses partitions montées, par exemple avec <code>sudo umount /dev/sdX1</code>. Remplacez ci-dessous <code>/dev/sdX</code> par le périphérique USB entier, et non par une partition telle que <code>/dev/sdX1</code>.",
@@ -541,7 +550,10 @@ const UI = (() => {
       "The request does not belong to this website.": "La solicitud no pertenece a este sitio web.",
       "Expected JSON.": "Se esperaba una solicitud JSON.",
       "Invalid request.": "Solicitud no válida.",
-      "Image preparation is currently unavailable. Please try again later.": "La preparación de imágenes no está disponible temporalmente. Inténtalo de nuevo más tarde."
+      "Image preparation is currently unavailable. Please try again later.": "La preparación de imágenes no está disponible temporalmente. Inténtalo de nuevo más tarde.",
+      "Invalid request key.": "Clave de recuperación no válida.",
+      "The request key is already bound to different input.": "La clave de recuperación ya está vinculada a otros datos.",
+      "The request recovery window has expired.": "El plazo de recuperación de la solicitud ha caducado."
     },
     "linuxTitle": "Linux (GNU dd)",
     "linuxWrite": "Abre un terminal en el directorio que contiene el archivo IMG descomprimido. Identifica la memoria USB con <code>lsblk -o NAME,SIZE,MODEL,TYPE,MOUNTPOINT</code>. Desmonta primero todas sus particiones montadas, por ejemplo con <code>sudo umount /dev/sdX1</code>. Sustituye <code>/dev/sdX</code> por el dispositivo USB completo, no por una partición como <code>/dev/sdX1</code>.",

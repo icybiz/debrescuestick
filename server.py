@@ -14,13 +14,13 @@ import time
 from urllib.parse import urlsplit
 
 from keys import public_key,InvalidKey
-from store import Store,Busy,Missing
+from store import Store,Busy,Missing,Conflict,Gone,Unavailable,request_digest
 import fast
 
 ROOT=Path(__file__).resolve().parent
 PREFIX='/debrescuestick'
 
-# Presentation only: keep the natively qualified key parser, queue and worker byte-identical.
+# Translate legacy human-readable errors without changing key normalization.
 ERROR_TEXT = {'Bitte einen öffentlichen SSH-Schlüssel angeben.': 'Please provide a public SSH key.',
  'Bitte nur eine öffentliche Schlüsselzeile einfügen, keinen privaten Schlüssel.': 'Paste one public key '
                                                                                    'line, never a private '
@@ -51,6 +51,7 @@ ERROR_TEXT = {'Bitte einen öffentlichen SSH-Schlüssel angeben.': 'Please provi
  'Auftrag nicht gefunden.': 'Request not found.',
  'Auftrag nicht gefunden oder bereits gelöscht.': 'The request was not found or has already been removed.',
  'Der Download ist abgelaufen.': 'The download has expired.',
+ 'Die Wiederherstellungsfrist ist abgelaufen.': 'The request recovery window has expired.',
  'Das Image konnte nicht erstellt werden. Bitte später erneut versuchen.': 'The image could not be '
                                                                            'prepared. Please try again '
                                                                            'later.'}
@@ -190,6 +191,12 @@ class Handler(BaseHTTPRequestHandler):
                 token=path.removeprefix('/api/jobs/')
                 with self.app.store() as store:record=store.get(token)
                 self.json(200,record);return
+            if path.startswith('/api/requests/'):
+                request_key=path.removeprefix('/api/requests/')
+                try:request_digest(request_key)
+                except ValueError:self.json(400,{'error':'Invalid request key.'});return
+                with self.app.store() as store:record=store.lookup(request_key)
+                self.json(200,record);return
             if path.startswith('/download/'):
                 token=path.removeprefix('/download/')
                 with self.app.store() as store:record=store.get(token)
@@ -216,6 +223,7 @@ class Handler(BaseHTTPRequestHandler):
                         self.wfile.write(block);remaining-=len(block)
                 return
             self.json(404,{'error':'Page not found.'})
+        except Gone as error:self.json(410,{'error':str(error),'job':error.record})
         except Missing as error:self.json(404,{'error':str(error)})
         except (BrokenPipeError,ConnectionResetError,TimeoutError):return
         except (FileNotFoundError,OSError):self.json(404,{'error':'File unavailable.'})
@@ -235,13 +243,17 @@ class Handler(BaseHTTPRequestHandler):
             if not 0<length<=20000:raise ValueError('Invalid request size.')
             data=json.loads(self.rfile.read(length))
             key,fingerprint=public_key(data['public_key'])
-            if not self.app.available():
-                self.json(503,{'error':'Image preparation is currently unavailable. Please try again later.'});return
+            if 'request_key' in data:request_digest(data['request_key'])
             # Apache must remove any incoming copy and set this from REMOTE_ADDR.
             address=self.headers.get('X-DRS-Client',self.client_address[0])
             client=hashlib.sha256(str(ipaddress.ip_address(address)).encode()).hexdigest()
-            with self.app.store() as store:record=store.create(key,fingerprint,client)
+            with self.app.store() as store:
+                record=store.create(key,fingerprint,client,request_key=data.get('request_key'),available=self.app.available())
             self.json(202,record)
+        except Gone as error:self.json(410,{'error':str(error),'job':error.record})
+        except Missing as error:self.json(404,{'error':str(error)})
+        except Conflict as error:self.json(409,{'error':str(error)})
+        except Unavailable as error:self.json(503,{'error':str(error)})
         except (ValueError,KeyError,TypeError) as error:
             self.json(429 if isinstance(error,Busy) else 400,{'error':str(error) if isinstance(error,(InvalidKey,Busy)) else 'Invalid request.'})
 

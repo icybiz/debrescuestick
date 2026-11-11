@@ -10,7 +10,10 @@ content and layout, with operator-specific details left empty. The general image
 service integration is not yet available in the EORLS editor; the old standalone
 HTML frontend is no longer served as the EORLS project page. The image backend and
 its exact Debian sources are retained. See [API.md](API.md) for the existing public
-service contract and its retry/recovery limitations. Do not reinstall the old
+service contract and deployment limitations. This source revision adds optional
+24-hour request-key recovery, tested against a real fast-worker ZIP in isolated
+final staging. The running backend must be upgraded before an adapter enables
+that extension; image/download lifetime remains two hours. Do not reinstall the old
 frontend or its broad reverse-proxy route over an EORLS customer website.
 
 This repository contains the complete original project software: the website,

@@ -159,6 +159,7 @@ def process(store,state,job,prepare=personalize):
 
 def reap(store,state):
     for job in store.expired():cleanup(state,job);store.forget(job)
+    store.purge()
     store.db.execute('DELETE FROM limits WHERE until<=?',(int(store.clock()),))
 
 
