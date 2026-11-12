@@ -4,9 +4,11 @@ A Debian-based USB rescue environment with SSH access through your own public
 key. The short network name is **debrstick.local**. Website:
 [eorls.com/debrescuestick](https://eorls.com/debrescuestick/).
 
-The public website is being rebuilt through the ordinary EORLS customer editor.
-The native `site.json` draft contains the English, German, French and Spanish
-content and layout, with operator-specific details left empty. The general image
+The website is created through the ordinary EORLS customer editor. The native
+`site.json` template contains the English, German, French and Spanish content
+and layout, with operator-specific details and confirmation left empty. It
+includes the guide, test information, source links and an explicit notice that
+the online image-preparation form is still being integrated. The general image
 service integration is not yet available in the EORLS editor; the old standalone
 HTML frontend is no longer served as the EORLS project page. The image backend and
 its exact Debian sources are retained. See [API.md](API.md) for the existing public
@@ -23,8 +25,10 @@ and private development notes are excluded.
 
 ## Use the rescue stick
 
-1. Submit one **public** OpenSSH key on the website. Keep the private key on your
-   own computer. The website never needs it.
+When the online image-preparation form is available, the workflow is:
+
+1. Submit one **public** OpenSSH key. Keep the private key on your own computer.
+   The service never needs it.
 2. Download and extract the ZIP before the two-hour request expiry.
 3. Write `DebRescueStick-amd64.img` to an entire USB device using an image writer.
    This replaces its contents. The image is 8 GiB + 8 MiB; use a nominal 16 GB or

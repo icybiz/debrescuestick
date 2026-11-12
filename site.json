@@ -11,9 +11,9 @@
   },
   "source": {
     "kind": "confirmed-draft",
-    "revisionId": "rev-40-rev-7f7e6e4d7e07a64efae76e031f17ef34",
-    "revisionNumber": 40,
-    "revisionCreatedAt": "2026-11-11T14:02:29.960Z"
+    "revisionId": "rev-58-rev-3428353b67984b67f9bf4eb5fa4a7ec7",
+    "revisionNumber": 58,
+    "revisionCreatedAt": "2026-11-12T08:25:00.292Z"
   },
   "publication": {
     "state": "not-published"
@@ -34,7 +34,7 @@
               },
               {
                 "id": "mod-6b3af2b6936b0b23839b48b3",
-                "value": "DebRescueStick ist ein unabhängiges USB-Rettungssystem auf Debian-Basis mit SSH-Zugang, der für deinen eigenen öffentlichen Schlüssel vorbereitet wird.\n\nStarte einen Rechner vom Stick, verbinde ihn mit einem kabelgebundenen Netzwerk und melde dich von einem anderen Rechner an. Dein privater SSH-Schlüssel bleibt bei dir. Die Rettungskonsole zeigt den Netzwerknamen, die IP-Adressen und die Fingerabdrücke der Hostschlüssel an.\n\n"
+                "value": "DebRescueStick ist ein unabhängiges USB-Rettungssystem auf Debian-Basis mit SSH-Zugang, der für deinen eigenen öffentlichen Schlüssel vorbereitet wird.\n\nStarte einen Rechner vom Stick, verbinde ihn mit einem kabelgebundenen Netzwerk und melde dich von einem anderen Rechner an. Dein privater SSH-Schlüssel bleibt bei dir. Die Rettungskonsole zeigt den Netzwerknamen, die IP-Adressen und die Fingerabdrücke der Hostschlüssel an.\n\nDas Onlineformular zur Vorbereitung eines persönlichen Images wird noch in die neue Website integriert. Anleitung, Testinformationen und Quellcode sind bereits über die Navigation erreichbar."
               }
             ],
             "title": "DebRescueStick"
@@ -92,7 +92,7 @@
               },
               {
                 "id": "mod-6b3af2b6936b0b23839b48b3",
-                "value": "DebRescueStick est un système de secours USB indépendant, basé sur Debian, avec un accès SSH préparé pour votre propre clé publique.\n\nDémarrez un ordinateur depuis la clé USB, connectez-le à un réseau filaire et ouvrez une session depuis un autre ordinateur. Votre clé SSH privée reste chez vous. La console de secours affiche le nom réseau, les adresses IP et les empreintes des clés d’hôte.\n\n"
+                "value": "DebRescueStick est un système de secours USB indépendant, basé sur Debian, avec un accès SSH préparé pour votre propre clé publique.\n\nDémarrez un ordinateur depuis la clé USB, connectez-le à un réseau filaire et ouvrez une session depuis un autre ordinateur. Votre clé SSH privée reste chez vous. La console de secours affiche le nom réseau, les adresses IP et les empreintes des clés d’hôte.\n\nLe formulaire de préparation d’une image personnalisée est en cours d’intégration au nouveau site. Le guide, les informations sur les tests et le code source sont déjà accessibles depuis le menu."
               }
             ],
             "title": "DebRescueStick"
@@ -150,7 +150,7 @@
               },
               {
                 "id": "mod-6b3af2b6936b0b23839b48b3",
-                "value": "DebRescueStick es un sistema de rescate USB independiente basado en Debian, con acceso SSH preparado para tu propia clave pública.\n\nArranca un ordenador desde la memoria USB, conéctalo a una red por cable e inicia sesión desde otro ordenador. Tu clave SSH privada permanece contigo. La consola de rescate muestra el nombre de red, las direcciones IP y las huellas de las claves del servidor.\n\n"
+                "value": "DebRescueStick es un sistema de rescate USB independiente basado en Debian, con acceso SSH preparado para tu propia clave pública.\n\nArranca un ordenador desde la memoria USB, conéctalo a una red por cable e inicia sesión desde otro ordenador. Tu clave SSH privada permanece contigo. La consola de rescate muestra el nombre de red, las direcciones IP y las huellas de las claves del servidor.\n\nEl formulario para preparar una imagen personalizada se está integrando en el nuevo sitio. La guía, la información sobre las pruebas y el código fuente ya están disponibles en el menú."
               }
             ],
             "title": "DebRescueStick"
@@ -211,7 +211,7 @@
           {
             "id": "mod-6b3af2b6936b0b23839b48b3",
             "type": "text",
-            "value": "DebRescueStick is an independent Debian-based USB rescue system with SSH access prepared for your own public key.\n\nBoot a computer from the stick, connect it to a wired network and sign in from another computer. Your private SSH key stays with you. The rescue console displays its network name, IP addresses and host key fingerprints.",
+            "value": "DebRescueStick is an independent Debian-based USB rescue system with SSH access prepared for your own public key.\n\nBoot a computer from the stick, connect it to a wired network and sign in from another computer. Your private SSH key stays with you. The rescue console displays its network name, IP addresses and host key fingerprints.\n\nThe online image-preparation form is being integrated into the new website. The guide, test information and source code are already available from the navigation.",
             "designTokens": {
               "font": "modern",
               "size": "regular",
