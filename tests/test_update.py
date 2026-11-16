@@ -1,4 +1,5 @@
 import copy
+from contextlib import closing
 import json
 import os
 from pathlib import Path
@@ -59,13 +60,13 @@ class UpdateTests(unittest.TestCase):
     def test_queue_drains_to_progress_but_busy_timeout_preserves_requests(self):
         with workspace() as state:
             database=state/'jobs.sqlite3'
-            with sqlite3.connect(database) as db:
+            with closing(sqlite3.connect(database)) as db, db:
                 db.execute('CREATE TABLE jobs(state TEXT)');db.execute('INSERT INTO jobs VALUES (?)',('queued',))
             with self.assertRaises(RuntimeError):update.wait_idle(state,timeout=0)
             def progress(delay):
-                with sqlite3.connect(database) as db:db.execute("UPDATE jobs SET state='ready'")
+                with closing(sqlite3.connect(database)) as db, db:db.execute("UPDATE jobs SET state='ready'")
             with patch('update.time.sleep',side_effect=progress):update.wait_idle(state)
-            with sqlite3.connect(database) as db:self.assertEqual(db.execute('SELECT state FROM jobs').fetchone()[0],'ready')
+            with closing(sqlite3.connect(database)) as db:self.assertEqual(db.execute('SELECT state FROM jobs').fetchone()[0],'ready')
 
     def test_failed_base_swap_restores_the_previous_directory(self):
         with workspace() as state:

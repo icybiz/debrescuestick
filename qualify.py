@@ -27,6 +27,19 @@ FILES=('qualify.py','base.py','worker.py','store.py','keys.py','fast.py','mdns.p
 def qa_unit(token):return 'debrescuestick-qa-worker-'+base.key(token)
 
 
+def input_stamp(path):
+    """Detect writes/replacements without rereading gigabytes while stopping."""
+    result=[]
+    for name in ('base.img','fast/prefix.zip'):
+        source=path/name
+        if source.resolve()!=source or not source.is_file():
+            raise ValueError('Canonical qualified input required')
+        info=source.stat()
+        # Other consumers may legitimately add/remove links to shared inputs.
+        result.append((info.st_dev,info.st_ino,info.st_size,info.st_mtime_ns))
+    return result
+
+
 def materialize(output,prefix,size):
     with fast.Reader([prefix,output/'image.tail']) as source,zipfile.ZipFile(source) as archive:
         names=archive.namelist()
@@ -228,8 +241,13 @@ cat /sys/kernel/security/lockdown
         return record
 
 
-def run(token,template,bundle_sha,queue=False):
+def run(token,template,bundle_sha,queue=False,serve=False,qualification=None):
     worker.require_host();base.key(token);base.key(template)
+    if serve:
+        if qualification is None:raise ValueError('Native qualification receipt required')
+        base.key(qualification)
+        if queue:raise ValueError('One qualification mode required')
+    elif qualification is not None:raise ValueError('Qualification binding is only for service mode')
     manifest={name:base.digest(ROOT/name) for name in FILES}
     if hashlib.sha256(json.dumps(manifest,sort_keys=True).encode()).hexdigest()!=bundle_sha:
         raise RuntimeError('Frozen qualification bundle changed')
@@ -238,18 +256,35 @@ def run(token,template,bundle_sha,queue=False):
     try:
         source=base.REMOTE/('image-'+template)
         proof=json.loads((source/'template.json').read_text())
+        if serve:
+            if 'fast' not in proof:raise ValueError('Qualified fast template required; no raw-copy fallback')
+            native=json.loads((path.parent/qualification/'result.json').read_text())
+            replay.binding_proof(proof,native)
         target=path/'base';target.mkdir(mode=0o700)
         os.link(source/'base.img',target/'base.img')
         base.write(target/'template.json',proof)
         if 'fast' in proof:
             shutil.copytree(source/'fast',target/'fast',copy_function=os.link)
-            started=time.perf_counter();worker.load_template(target,proof)
-            record['prefix_warmup_seconds']=time.perf_counter()-started
+            if not serve:
+                started=time.perf_counter();worker.load_template(target,proof)
+                record['prefix_warmup_seconds']=time.perf_counter()-started
         results=[]
-        for name in ('a','b'):
+        for name in (() if serve else ('a','b')):
             subprocess.run(['ssh-keygen','-q','-t','ed25519','-N','','-C','DebRescueStick-ephemeral-QA',
                             '-f',str(path/('key-'+name))],check=True)
-        if queue:
+        if serve:
+            base.write(target/'qualified.json',native)
+            shared=path/'archives'/proof['sha256'];shared.mkdir(parents=True)
+            os.link(target/'fast/prefix.zip',shared/'prefix.zip')
+            initial=input_stamp(target)
+            base.write(path/'progress.json',{'phase':'service-verifying-input'})
+            if base.digest(target/'base.img')!=proof['sha256']:raise RuntimeError('Cold template changed before service admission')
+            base.write(path/'progress.json',{'phase':'service-starting'})
+            service=replay.serve(path)
+            if input_stamp(target)!=initial:raise RuntimeError('Qualified service inputs changed')
+            record.update(success=True,service=service,sha256=proof['sha256'],native_qualification=qualification,
+                          inputs_verified_before_admission=True,inputs_unchanged=True)
+        elif queue:
             base.write(path/'progress.json',{'phase':'queue-replay'})
             queue_result=replay.qualify(path)
             if base.digest(target/'base.img')!=proof['sha256']:raise RuntimeError('Cold template was modified')
@@ -275,7 +310,7 @@ def run(token,template,bundle_sha,queue=False):
                           architecture='amd64',sha256=proof['sha256'],qualified=True,secure_boot=True,mdns=True,console=True,own_license=True,hostname=mdns.HOST_NAME)
     except Exception as error:record['error']=type(error).__name__+': '+str(error)
     finally:
-        if queue:
+        if queue or serve:
             for name in ('key-a','key-a.pub','key-b','key-b.pub'):
                 (path/name).unlink(missing_ok=True)
     record['finished']=time.time();base.write(path/'result.json',record)
@@ -283,8 +318,13 @@ def run(token,template,bundle_sha,queue=False):
     return 0 if record['success'] else 1
 
 
-def submit(token,template,queue=False):
+def submit(token,template,queue=False,serve=False,qualification=None):
     base.key(token);base.key(template)
+    if serve:
+        if qualification is None:raise ValueError('Native qualification receipt required')
+        base.key(qualification)
+        if queue:raise ValueError('One qualification mode required')
+    elif qualification is not None:raise ValueError('Qualification binding is only for service mode')
     files={name:(ROOT/name).read_bytes() for name in FILES}
     manifest={name:hashlib.sha256(raw).hexdigest() for name,raw in files.items()}
     sha=hashlib.sha256(json.dumps(manifest,sort_keys=True).encode()).hexdigest()
@@ -309,14 +349,16 @@ for name,data in FILES.items():
  assert hashlib.sha256(f.read_bytes()).hexdigest()==MANIFEST[name]
 argv=['systemd-run','--setenv=DRS_BUILD_HOST='+HOSTNAME,'--unit='+UNIT,'--property=CPUQuota=100%','--property=MemoryMax=2G',
  '--property=MemorySwapMax=0','--property=Nice=10','--property=IOWeight=10',
- '--property=TasksMax=128','--property=RuntimeMaxSec=1800','--property=TimeoutStopSec=45',
+ '--property=TasksMax=128','--property=RuntimeMaxSec='+('3600' if SERVE else '1800'),'--property=TimeoutStopSec=45',
  '/usr/bin/python3',str(code/'qualify.py'),'run','--key',KEY,'--template',TEMPLATE,'--sha',SHA]
 if QUEUE:argv.append('--queue')
+if SERVE:argv+=['--serve','--qualification',QUALIFICATION]
 subprocess.run(argv,capture_output=True,text=True,check=True,timeout=20)
-print(json.dumps({'unit':UNIT,'key':KEY,'template_job':TEMPLATE,'bundle_sha256':SHA,'files':MANIFEST,'queue':QUEUE}))
+print(json.dumps({'unit':UNIT,'key':KEY,'template_job':TEMPLATE,'bundle_sha256':SHA,'files':MANIFEST,'queue':QUEUE,'serve':SERVE,'qualification':QUALIFICATION}))
 '''
     values={'HOSTNAME':base.HOSTNAME,'KEY':token,'TEMPLATE':template,'UNIT':qa_unit(token),'SHA':sha,
-            'FILES':{name:base64.b64encode(raw).decode() for name,raw in files.items()},'MANIFEST':manifest,'QUEUE':queue}
+            'FILES':{name:base64.b64encode(raw).decode() for name,raw in files.items()},'MANIFEST':manifest,'QUEUE':queue,
+            'SERVE':serve,'QUALIFICATION':qualification}
     result=base.remote('\n'.join(n+'='+repr(v) for n,v in values.items())+'\n'+code)
     base.write(ROOT/'artifacts'/('qa-job-'+token+'.json'),result);return result
 
@@ -339,9 +381,44 @@ print(json.dumps(value))
     base.write(ROOT/'artifacts'/('qa-status-'+token+'.json'),result);return result
 
 
+def stop_session(token):
+    """Stop only the precise service generation submitted by this checkout."""
+    base.key(token)
+    receipt=json.loads((ROOT/'artifacts'/('qa-job-'+token+'.json')).read_text())
+    if receipt.get('key')!=token or receipt.get('unit')!=qa_unit(token) or receipt.get('serve') is not True:
+        raise ValueError('Own submitted integration session required')
+    expected=['/usr/bin/python3','/var/lib/debrescuestick/qa/code-'+receipt['bundle_sha256']+'/qualify.py',
+              'run','--key',token,'--template',receipt['template_job'],'--sha',receipt['bundle_sha256'],
+              '--serve','--qualification',receipt['qualification']]
+    code=r'''from pathlib import Path
+import json,socket,subprocess
+assert socket.gethostname()==HOSTNAME
+raw=subprocess.check_output(['systemctl','show',UNIT+'.service','--property=ActiveState,MainPID,Result,ExecMainStatus'],text=True)
+state=dict(line.split('=',1) for line in raw.splitlines())
+pid=int(state['MainPID'])
+if pid:
+ assert Path('/proc',str(pid),'cmdline').read_bytes().split(b'\0')[:-1]==[s.encode() for s in EXPECTED]
+ assert ('0::/system.slice/'+UNIT+'.service') in Path('/proc',str(pid),'cgroup').read_text().splitlines()
+ subprocess.run(['systemctl','stop',UNIT+'.service'],check=True,capture_output=True,timeout=75)
+raw=subprocess.check_output(['systemctl','show',UNIT+'.service','--property=ActiveState,MainPID,Result,ExecMainStatus'],text=True)
+state=dict(line.split('=',1) for line in raw.splitlines())
+assert state['ActiveState'] in ('inactive','failed') and state['MainPID']=='0'
+group=Path('/sys/fs/cgroup/system.slice')/(UNIT+'.service')/'cgroup.procs'
+assert not group.exists() or not group.read_text().strip()
+print(json.dumps({'unit':UNIT,'stopped':True,'graceful':state['Result']=='success' and state['ExecMainStatus']=='0',
+                 'identity_checked':bool(pid),'systemd':state}))
+'''
+    result=base.remote('HOSTNAME='+repr(base.HOSTNAME)+'\nUNIT='+repr(qa_unit(token))+'\nEXPECTED='+repr(expected)+'\n'+code,timeout=90)
+    base.write(ROOT/'artifacts'/('qa-stopped-'+token+'.json'),result);return result
+
+
 if __name__=='__main__':
-    p=argparse.ArgumentParser(description=__doc__);p.add_argument('action',choices=('submit','status','run'))
-    p.add_argument('--key');p.add_argument('--template');p.add_argument('--sha');p.add_argument('--queue',action='store_true');p.add_argument('--verbose',action='store_true');a=p.parse_args()
-    if a.action=='run':raise SystemExit(run(a.key,a.template,a.sha,a.queue))
-    result=submit(a.key or secrets.token_hex(5),a.template,a.queue) if a.action=='submit' else status(a.key)
+    p=argparse.ArgumentParser(description=__doc__);p.add_argument('action',choices=('submit','status','run','stop'))
+    p.add_argument('--key');p.add_argument('--template');p.add_argument('--sha')
+    mode=p.add_mutually_exclusive_group();mode.add_argument('--queue',action='store_true');mode.add_argument('--serve',action='store_true')
+    p.add_argument('--qualification');p.add_argument('--verbose',action='store_true');a=p.parse_args()
+    if a.action=='run':raise SystemExit(run(a.key,a.template,a.sha,a.queue,a.serve,a.qualification))
+    if a.action=='submit':result=submit(a.key or secrets.token_hex(5),a.template,a.queue,a.serve,a.qualification)
+    elif a.action=='stop':result=stop_session(a.key)
+    else:result=status(a.key)
     print(json.dumps(result if a.action=='submit' or a.verbose else base.brief(result)))

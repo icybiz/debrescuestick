@@ -107,10 +107,10 @@ def run(token,sha,pin_sha):
     return 0 if record['success'] else 1
 
 
-def remote(code):
+def remote(code,timeout=30):
     compile(code,'<factory-submit>','exec')
     reply=subprocess.run(['ssh','-oBatchMode=yes','-oStrictHostKeyChecking=yes',os.environ.get('DRS_BUILD_SSH','root@prox'),'python3 -'],input=code,
-                         capture_output=True,text=True,timeout=30)
+                         capture_output=True,text=True,timeout=timeout)
     if reply.returncode:raise RuntimeError(reply.stderr[-2500:])
     return json.loads(reply.stdout)
 

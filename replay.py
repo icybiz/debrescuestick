@@ -5,6 +5,9 @@ import hashlib
 import json
 from pathlib import Path
 import secrets
+import signal
+import subprocess
+import sys
 import threading
 import time
 import urllib.error
@@ -14,6 +17,101 @@ from keys import public_key
 import server
 from store import Store, REPLAY_TTL
 import worker
+
+
+def binding_proof(template, qualification):
+    """Only reuse an independently qualified image with exactly this identity."""
+    flags = ('success', 'qualified', 'key_isolation', 'ssh_positive_negative')
+    sha = template.get('sha256')
+    if (not isinstance(sha, str) or len(sha) != 64 or
+            any(c not in '0123456789abcdef' for c in sha) or
+            qualification.get('sha256') != sha or
+            qualification.get('architecture') != 'amd64' or
+            not all(qualification.get(k) is True for k in flags)):
+        raise ValueError('Independent qualification of this exact image required')
+    return qualification
+
+
+@contextmanager
+def session(state, ready_timeout=90):
+    """Real web/worker pair, confined to its caller's admitted QA unit."""
+    worker.require_host()
+    state = Path(state)
+    if state.resolve() != state or not state.is_dir():
+        raise ValueError('Canonical own QA state required')
+    if not 0 < ready_timeout <= 90:
+        raise ValueError('Bounded startup deadline required')
+    class Listener(server.HTTPServer):
+        # Closing the listener joins its own requests before removing job files.
+        daemon_threads = False
+    listener = Listener(('127.0.0.1', 0), server.Handler)
+    listener.app = server.App(state)
+    child = None
+    thread = None
+    info = {}
+    try:
+        with listener.app.store():pass
+        with (state/'worker.log').open('xb') as log:
+            child = subprocess.Popen([sys.executable, str(Path(worker.__file__).resolve()),
+                                      '--state', str(state)], stdout=log, stderr=log)
+        thread = threading.Thread(target=listener.serve_forever, daemon=True)
+        thread.start()
+        until = time.monotonic()+ready_timeout
+        while True:
+            if child.poll() is not None:
+                raise RuntimeError('Owned staging worker stopped before readiness')
+            try:heartbeat=json.loads((state/'heartbeat.json').read_text())
+            except (OSError, ValueError):heartbeat={}
+            if heartbeat.get('pid')==child.pid and listener.app.available():break
+            if time.monotonic() >= until:
+                raise RuntimeError('Owned staging worker readiness timed out')
+            time.sleep(.1)
+        info = {'endpoint': 'http://127.0.0.1:'+str(listener.server_address[1])+server.PREFIX,
+                'worker_ready': True, 'real_worker': True, 'boot_tested': False}
+        yield info
+    finally:
+        if child is not None and child.poll() is None:
+            # Popen tracks this unreaped direct child; never signal by name/port.
+            child.terminate()
+            try:child.wait(10)
+            except subprocess.TimeoutExpired:
+                child.kill();child.wait(5)
+        (state/'heartbeat.json').unlink(missing_ok=True)
+        if thread is not None and thread.ident is not None:
+            listener.shutdown()
+        listener.server_close()
+        if thread is not None and thread.ident is not None:thread.join(5)
+        if child is not None:
+            store = Store(state/'jobs.sqlite3')
+            try:
+                rows = store.db.execute('SELECT id FROM jobs').fetchall()
+                for row in rows:worker.cleanup(state, row['id'])
+                store.db.execute('DELETE FROM jobs')
+                store.db.execute('DELETE FROM limits')
+            finally:store.close()
+            info.update(stopped=True, jobs_cleaned=len(rows))
+
+
+def serve(state, lifetime=2700, stop=None):
+    """Keep one final integration session for at most 45 minutes."""
+    if not 0 < lifetime <= 2700:
+        raise ValueError('Integration lifetime must be finite and at most45min')
+    stop = stop if stop is not None else threading.Event()
+    previous = {}
+    if threading.current_thread() is threading.main_thread():
+        for number in (signal.SIGTERM, signal.SIGINT):
+            previous[number] = signal.signal(number, lambda unused, frame:stop.set())
+    try:
+        with session(state) as info:
+            info['deadline'] = time.time()+lifetime
+            target = Path(state)/'progress.json'
+            temporary = target.with_suffix('.new')
+            temporary.write_text(json.dumps(dict(info, phase='service-ready'))+'\n')
+            temporary.replace(target)
+            stop.wait(lifetime)
+        return info
+    finally:
+        for number, handler in previous.items():signal.signal(number, handler)
 
 
 def qualify(state):

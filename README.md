@@ -2,14 +2,14 @@
 
 A Debian-based USB rescue environment with SSH access through your own public
 key. The short network name is **debrstick.local**. Website:
-[eorls.com/debrescuestick](https://eorls.com/debrescuestick/).
+[eorls.com/debrescuestick](https://eorls.com/debrescuestick).
 
 The website is created through the ordinary EORLS customer editor. The native
 `site.json` template contains the English, German, French and Spanish content
 and layout, with operator-specific details and confirmation left empty. It
 includes the guide, test information, source links and an explicit notice that
 the online image-preparation form is still being integrated. The general image
-service integration is not yet available in the EORLS editor; the old standalone
+service integration is not yet available in the production EORLS editor; the old standalone
 HTML frontend is no longer served as the EORLS project page. The image backend and
 its exact Debian sources are retained. See [API.md](API.md) for the existing public
 service contract and deployment limitations. This source revision adds optional
@@ -266,3 +266,38 @@ manifest with file sizes and SHA256 hashes. It excludes private configuration,
 credentials, downloads, runtime state and private Git history. Historical
 SystemRescueCD converter material remains a separate work under its original
 authors' license and is not required to build this Debian-based project.
+
+## Update an existing backend
+
+`switch.py` updates the five qualified backend modules together. It preserves the
+existing service definitions, configuration, image inputs and static files. Use
+`inspect --plan /path/to/runtime-plan.json` to validate local source hashes and
+print the plan checksum without contacting the deployment host. The operator
+plan contains `runtime_only` and `expected_previous_runtime5` manifests, each
+with exactly `server.py`, `worker.py`, `store.py`, `keys.py` and `fast.py`; every
+entry records `bytes` and `sha256`. `expected_previous_release` identifies the
+current immutable release directory on your own backend host.
+
+After explicit approval of that exact plan, configure the assigned host as in
+`operator.env.example` and run:
+
+```sh
+python3 switch.py apply --plan /path/to/runtime-plan.json --approval /path/to/approval.json
+```
+
+The private approval file contains `approved: true`, the exact `plan_sha256`,
+`approved_by`, and an ISO timestamp with timezone in `approved_at`. Keep operator
+plans, approvals and operational backups outside the public source export.
+
+The updater waits for an empty queue before closing the web listener, drains any
+job admitted in the meantime, stops the worker and makes a SQLite backup including
+committed WAL content. It then switches both modules as one release and verifies
+the new worker heartbeat, API availability and replay schema. Existing jobs and
+downloads cause a refusal before service shutdown; retry after their expiry.
+
+A failure before the release switch resumes and checks the previous services.
+A failure after the switch keeps the web listener closed for compatible repair:
+never restore stale queue metadata or start an older worker while new request-key
+bindings may exist. A protected operation journal and database backup remain on
+the backend host. This command never publishes an EORLS website or registers a
+provider; those actions use their separate ordinary platform workflow.
