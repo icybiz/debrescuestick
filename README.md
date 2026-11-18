@@ -12,11 +12,13 @@ the online image-preparation form is still being integrated. The general image
 service integration is not yet available in the production EORLS editor; the old standalone
 HTML frontend is no longer served as the EORLS project page. The image backend and
 its exact Debian sources are retained. See [API.md](API.md) for the existing public
-service contract and deployment limitations. This source revision adds optional
-24-hour request-key recovery, tested against a real fast-worker ZIP in isolated
-final staging. The running backend must be upgraded before an adapter enables
-that extension; image/download lifetime remains two hours. Do not reinstall the old
-frontend or its broad reverse-proxy route over an EORLS customer website.
+service contract and deployment limitations. The operated backend now provides
+optional 24-hour request-key recovery, qualified against a real fast-worker ZIP
+in final staging. The native website form awaits the separate platform rollout;
+image/download lifetime remains two hours. Operators installing another instance
+must deploy matching web and worker modules before enabling recovery in an adapter.
+Do not reinstall the old frontend or its broad reverse-proxy route over an EORLS
+customer website.
 
 This repository contains the complete original project software: the website,
 HTTP backend, queue, image builder, boot scripts, deployment and qualification

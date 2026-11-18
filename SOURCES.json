@@ -7,8 +7,8 @@
       "sha256": "57b0126382f729e0a47430186f77580da6627b794441b159f1139a8bf5f04a67"
     },
     "API.md": {
-      "bytes": 12791,
-      "sha256": "0d683b8752559a436d1d86c16c13761754a071010b19bcb224af311ac1e57e60"
+      "bytes": 12932,
+      "sha256": "db3bfe07bd284bfb345bf73270dd640440a820789f11d544775080d67ba17007"
     },
     "COPYING": {
       "bytes": 35149,
@@ -19,8 +19,8 @@
       "sha256": "92629eeca67b9d9d8286184206eb0ec22e7c94c58bf6b10ddcf6c50f503ee26d"
     },
     "README.md": {
-      "bytes": 17384,
-      "sha256": "5ce767a8dbbaef12ff53d87d8bbcdf768d6141a3632d9b83c09b719cdb52cceb"
+      "bytes": 17491,
+      "sha256": "51ba303419306c37a8adff5fce1526456d1084503a63b54981e77ba92f577860"
     },
     "base.py": {
       "bytes": 9200,
