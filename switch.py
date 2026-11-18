@@ -176,6 +176,12 @@ def switch(plan, runtime, *, application=Path('/opt/debrescuestick'),
             path.chmod(0o644)
         if release_files(target) != values:
             raise RuntimeError('Written candidate differs')
+    # The operator intentionally uses umask 077 for metadata/backups. Release
+    # sources are public and must remain readable by the unprivileged services,
+    # including when an identical candidate from an earlier attempt is reused.
+    target.chmod(0o755)
+    for path in target.rglob('*'):
+        path.chmod(0o755 if path.is_dir() else 0o644)
     operation = operations / ('runtime-' + digest)
     operation.mkdir(parents=True, mode=0o700, exist_ok=False)
     proof = {'success': False, 'plan_sha256': digest, 'old_release': str(old),

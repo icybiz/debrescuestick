@@ -235,8 +235,8 @@
       "sha256": "06b3a2e6cf97bc790dde8030105fff4b6d7e63c9b0ecefd62031e7867e54545f"
     },
     "switch.py": {
-      "bytes": 13651,
-      "sha256": "e58a79e9d8900f98751f1842d65c61b51c62a54bb09a49deadceec5836090959"
+      "bytes": 14001,
+      "sha256": "2739dede8ddcac16afafc4e4b921b515665a117ea4436035f463cf53128a2a88"
     },
     "tests/explorer.ps1": {
       "bytes": 6508,
@@ -383,8 +383,8 @@
       "sha256": "34450b8c1999fec993b2239824e26bd0fed6050ea622952586e15d4d936745f5"
     },
     "tests/test_switch.py": {
-      "bytes": 11865,
-      "sha256": "582285c6aac4f24e13f904641db1b33f33791f49bc4a9e135741fca71305d87d"
+      "bytes": 13861,
+      "sha256": "ec274eeebcc443561416164cb2a9eec3498bbc2de5fa6cca2fa1778cd9d0542d"
     },
     "tests/test_ui.py": {
       "bytes": 618,

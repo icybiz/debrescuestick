@@ -1,6 +1,8 @@
 import io
 from contextlib import closing
+import hashlib
 import json
+import os
 from pathlib import Path
 import sqlite3
 import tempfile
@@ -109,7 +111,7 @@ class SwitchTests(unittest.TestCase):
                     switch.run_unit(action, unit)
             run.assert_not_called()
 
-    def transaction(self, fault=None):
+    def transaction(self, fault=None, prebuilt=False):
         """Entire switch on small real files/SQLite; service commands are fakes."""
         folder = tempfile.TemporaryDirectory()
         self.addCleanup(folder.cleanup)
@@ -131,6 +133,15 @@ class SwitchTests(unittest.TestCase):
         plan = {'expected_previous_release': str(old),
                 'expected_previous_runtime5': {n: switch.identity(previous[n]) for n in switch.MODULES},
                 'runtime_only': {n: switch.identity(v) for n, v in runtime.items()}}
+        if prebuilt:
+            values = dict(previous, **runtime)
+            digest = hashlib.sha256(json.dumps(
+                {n: switch.identity(v) for n, v in values.items()}, sort_keys=True).encode()).hexdigest()
+            target = app / 'releases' / digest
+            target.mkdir(mode=0o700)
+            for name, raw in values.items():
+                path = target / name; path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_bytes(raw); path.chmod(0o600)
         commands = []
         self.transaction_commands = commands
 
@@ -175,6 +186,34 @@ class SwitchTests(unittest.TestCase):
         self.assertTrue(saved.exists())
         self.assertEqual({}, switch.queue_counts(saved))
         self.assertEqual({}, switch.queue_counts(database))
+
+    def test_restrictive_operator_umask_keeps_service_release_readable(self):
+        previous = os.umask(0o077)
+        try:
+            result, commands, app, old, before, runtime, database = self.transaction()
+        finally:
+            os.umask(previous)
+        self.assertTrue(result['success'])
+        target = (app / 'current').resolve()
+        for directory in (target, target / 'static'):
+            self.assertEqual(0o755, directory.stat().st_mode & 0o777)
+        self.assertEqual(0o644, (target / 'worker.py').stat().st_mode & 0o777)
+        self.assertEqual(before['static/index.html'], (target / 'static/index.html').read_bytes())
+
+    def test_identical_prebuilt_candidate_restores_service_access_and_preserves_private_backup(self):
+        previous = os.umask(0o077)
+        try:
+            result, commands, app, old, before, runtime, database = self.transaction(prebuilt=True)
+        finally:
+            os.umask(previous)
+        self.assertTrue(result['success'])
+        target = (app / 'current').resolve()
+        self.assertEqual(0o755, target.stat().st_mode & 0o777)
+        self.assertEqual(0o755, (target / 'static').stat().st_mode & 0o777)
+        self.assertEqual(0o644, (target / 'worker.py').stat().st_mode & 0o777)
+        operation = Path(result['proof_path']).parent
+        self.assertEqual(0o700, operation.stat().st_mode & 0o777)
+        self.assertEqual(0o600, (operation / 'jobs.sqlite3').stat().st_mode & 0o777)
 
     def test_pre_switch_drain_failure_resumes_previous_web_without_replacing_source(self):
         result, commands, app, old, previous, runtime, database = self.transaction('drain')
