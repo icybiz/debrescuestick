@@ -7,8 +7,8 @@
       "sha256": "57b0126382f729e0a47430186f77580da6627b794441b159f1139a8bf5f04a67"
     },
     "API.md": {
-      "bytes": 12932,
-      "sha256": "db3bfe07bd284bfb345bf73270dd640440a820789f11d544775080d67ba17007"
+      "bytes": 12921,
+      "sha256": "90b73a35c19b23cabba3fa92b262ef97d65e07beaa5bd56f0efe8d77c042af4a"
     },
     "COPYING": {
       "bytes": 35149,
@@ -19,8 +19,8 @@
       "sha256": "92629eeca67b9d9d8286184206eb0ec22e7c94c58bf6b10ddcf6c50f503ee26d"
     },
     "README.md": {
-      "bytes": 17491,
-      "sha256": "51ba303419306c37a8adff5fce1526456d1084503a63b54981e77ba92f577860"
+      "bytes": 17196,
+      "sha256": "6be71477f1820caad3c6c0c33fb1a42b406c98a61905557dba6239d673949475"
     },
     "base.py": {
       "bytes": 9200,
@@ -199,8 +199,8 @@
       "sha256": "f72c00620653a0f652b28f5d398996b2b43b39e8f4dccf63c2b813848d9d11ee"
     },
     "site.json": {
-      "bytes": 27998,
-      "sha256": "c00d8bee5da6967b57fe326f50dd6e1cb984f5e9e00e7c40302b170e5b5928ad"
+      "bytes": 29146,
+      "sha256": "a637c2a36644b3e7239e96c184ea8b1f356c71368f73863e1d650fff921d40fc"
     },
     "sources.py": {
       "bytes": 13198,

@@ -4,21 +4,18 @@ A Debian-based USB rescue environment with SSH access through your own public
 key. The short network name is **debrstick.local**. Website:
 [eorls.com/debrescuestick](https://eorls.com/debrescuestick).
 
-The website is created through the ordinary EORLS customer editor. The native
-`site.json` template contains the English, German, French and Spanish content
-and layout, with operator-specific details and confirmation left empty. It
-includes the guide, test information, source links and an explicit notice that
-the online image-preparation form is still being integrated. The general image
-service integration is not yet available in the production EORLS editor; the old standalone
-HTML frontend is no longer served as the EORLS project page. The image backend and
-its exact Debian sources are retained. See [API.md](API.md) for the existing public
-service contract and deployment limitations. The operated backend now provides
-optional 24-hour request-key recovery, qualified against a real fast-worker ZIP
-in final staging. The native website form awaits the separate platform rollout;
-image/download lifetime remains two hours. Operators installing another instance
-must deploy matching web and worker modules before enabling recovery in an adapter.
-Do not reinstall the old frontend or its broad reverse-proxy route over an EORLS
-customer website.
+The published website provides image preparation through the native EORLS service
+form. It is maintained through the ordinary customer editor. The `site.json`
+template contains the actual English, German, French and Spanish content and
+layout, including the image service, guide, test information, source links and
+forum. Operator details and publication confirmations are left empty for reuse.
+
+The backend supports optional 24-hour request-key recovery. Images and downloads
+expire two hours after the request. Keep work links private: anyone holding a
+link can access its available result. See [API.md](API.md) for the public service
+contract. Operators of another installation must deploy matching web and worker
+modules before enabling recovery in an adapter. The former standalone HTML
+frontend is retained in the sources for historical reference.
 
 This repository contains the complete original project software: the website,
 HTTP backend, queue, image builder, boot scripts, deployment and qualification
@@ -27,7 +24,7 @@ and private development notes are excluded.
 
 ## Use the rescue stick
 
-When the online image-preparation form is available, the workflow is:
+Open the website’s service and:
 
 1. Submit one **public** OpenSSH key. Keep the private key on your own computer.
    The service never needs it.
@@ -47,9 +44,10 @@ disabled. The local rescue console provides root access to someone physically
 at the machine. New host keys and machine identity are generated during boot.
 
 The image contains Debian rescue tools including GNU ddrescue, TestDisk,
-smartmontools, GParted, cryptsetup and rsync. The native website draft has English, German, French and Spanish editions.
-Public visitor language/appearance behavior still needs acceptance after the
-normal EORLS integration; editor preferences are not a substitute for that test.
+smartmontools, GParted, cryptsetup and rsync. The published website has English,
+German, French and Spanish editions. Its visitor language, navigation, service
+entry and forum links were checked after publication. A real anonymous request
+reached a ready result and recovered through the same work link after reload.
 The image is AMD64; writing it from an ARM Mac does not make it ARM-bootable.
 
 ## Architecture

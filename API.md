@@ -1,11 +1,11 @@
 # Public image-service API
 
 This contract describes the DebRescueStick image API in this source revision.
-The operated DebRescueStick backend now includes the qualified request-key
-recovery implementation. The native website form still awaits its separate
-platform rollout. Other installations must upgrade their matching web and worker
-modules together: an older service can still ignore `request_key`. Updating this
-document alone does not enable recovery in another deployment.
+The operated DebRescueStick website provides image preparation through its native
+service form, backed by the qualified request-key recovery implementation. Other
+installations must upgrade their matching web and worker modules together: an
+older service can still ignore `request_key`. Updating this document alone does
+not enable recovery in another deployment.
 
 For EORLS website editing: create and maintain the EORLS
 website through its normal customer UI. The old standalone HTML frontend is no
